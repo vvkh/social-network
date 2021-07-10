@@ -9,12 +9,15 @@ import (
 	"github.com/vvkh/social-network/internal/routes/register"
 	"github.com/vvkh/social-network/internal/routes/user"
 	"github.com/vvkh/social-network/internal/routes/users"
+	"github.com/vvkh/social-network/internal/templates"
 )
 
-func (s *server) setupRoutes(templateDir string) {
+func (s *server) setupRoutes(templatesDir string) {
+	templates := templates.New(templatesDir, "bootstrap").Add("base.gohtml")
+
 	s.handler.Get("/", index.Handle())
-	s.handler.Get("/login/", login.Handle(templateDir))
-	s.handler.Get("/register/", register.Handle(templateDir))
+	s.handler.Get("/login/", login.Handle(templates))
+	s.handler.Get("/register/", register.Handle(templates))
 	s.handler.Get("/friends/", friends.Handle())
 	s.handler.Route("/users/", func(r chi.Router) {
 		r.Get("/", users.Handle())

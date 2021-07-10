@@ -1,17 +1,15 @@
 package register
 
 import (
-	"html/template"
 	"net/http"
-	"path"
+
+	"github.com/vvkh/social-network/internal/templates"
 )
 
-func Handle(templatesDir string) http.HandlerFunc {
-	t := template.Must(template.ParseFiles(
-		path.Join(templatesDir, "base.gohtml"),
-		path.Join(templatesDir, "register.gohtml"),
-	))
+func Handle(templates *templates.Templates) http.HandlerFunc {
+	render := templates.Add("register.gohtml").Parse()
+
 	return func(writer http.ResponseWriter, request *http.Request) {
-		_ = t.Execute(writer, nil)
+		_ = render(writer, nil)
 	}
 }
