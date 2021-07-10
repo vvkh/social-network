@@ -1,9 +1,17 @@
 package register
 
-import "net/http"
+import (
+	"html/template"
+	"net/http"
+	"path"
+)
 
-func Handle() http.HandlerFunc {
+func Handle(templatesDir string) http.HandlerFunc {
+	t := template.Must(template.ParseFiles(
+		path.Join(templatesDir, "base.gohtml"),
+		path.Join(templatesDir, "register.gohtml"),
+	))
 	return func(writer http.ResponseWriter, request *http.Request) {
-		_, _ = writer.Write([]byte(`register`))
+		_ = t.Execute(writer, nil)
 	}
 }

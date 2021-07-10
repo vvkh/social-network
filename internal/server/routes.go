@@ -1,9 +1,6 @@
 package server
 
 import (
-	"html/template"
-	"path"
-
 	"github.com/go-chi/chi/v5"
 
 	"github.com/vvkh/social-network/internal/routes/friends"
@@ -15,11 +12,9 @@ import (
 )
 
 func (s *server) setupRoutes(templateDir string) {
-	templates := template.Must(template.ParseGlob(path.Join(templateDir, "*")))
-
 	s.handler.Get("/", index.Handle())
-	s.handler.Get("/login/", login.Handle(templates))
-	s.handler.Get("/register/", register.Handle())
+	s.handler.Get("/login/", login.Handle(templateDir))
+	s.handler.Get("/register/", register.Handle(templateDir))
 	s.handler.Get("/friends/", friends.Handle())
 	s.handler.Route("/users/", func(r chi.Router) {
 		r.Get("/", users.Handle())

@@ -48,8 +48,9 @@ func Test_Login(t *testing.T) {
 		t.Error("error while parsing response body")
 	}
 
-	if !strings.Contains(string(body), "<title>Login</title>") {
-		t.Errorf(`want body to contain HTML with <title>Login</title>, got = "%s"`, body)
+	wantContent := "<title>Login</title>"
+	if !strings.Contains(string(body), wantContent) {
+		t.Errorf(`want body to contain %s, got = "%s"`, wantContent, body)
 	}
 }
 
@@ -70,9 +71,9 @@ func Test_Register(t *testing.T) {
 		t.Error("error while parsing response body")
 	}
 
-	wantBody := "register"
-	if wantBody != string(body) {
-		t.Errorf(`want body = "%s", got = "%s"`, wantBody, body)
+	wantContent := "<title>Register</title>"
+	if !strings.Contains(string(body), wantContent) {
+		t.Errorf(`want body to contain %s, got = "%s"`, wantContent, body)
 	}
 }
 

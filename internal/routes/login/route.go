@@ -3,10 +3,15 @@ package login
 import (
 	"html/template"
 	"net/http"
+	"path"
 )
 
-func Handle(templates *template.Template) http.HandlerFunc {
+func Handle(templatesDir string) http.HandlerFunc {
+	t := template.Must(template.ParseFiles(
+		path.Join(templatesDir, "base.gohtml"),
+		path.Join(templatesDir, "login.gohtml"),
+	))
 	return func(writer http.ResponseWriter, request *http.Request) {
-		_ = templates.ExecuteTemplate(writer, "login.gohtml", nil)
+		_ = t.Execute(writer, nil)
 	}
 }
