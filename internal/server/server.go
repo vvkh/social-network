@@ -5,11 +5,13 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/joho/godotenv"
 )
 
 type server struct {
-	handler *http.ServeMux
+	handler *chi.Mux
 	address string
 }
 
@@ -25,9 +27,9 @@ func NewDefault() (*server, error) {
 }
 
 func New(address string) *server {
-	handler := http.NewServeMux()
+	router := chi.NewRouter()
 	s := server{
-		handler: handler,
+		handler: router,
 		address: address,
 	}
 	s.setupRoutes()
