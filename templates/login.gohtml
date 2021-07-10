@@ -1,0 +1,16 @@
+{{ template "base" }}
+
+{{ define "title"}}Login{{end}}
+
+{{ define "content" }}
+<form>
+   <!-- TODO: add CSRF token -->
+   <label for="username">Username</label>
+   <input id="username" type="text" placeholder="John Doe" />
+
+   <label for="password">Password</label>
+   <input id="password" type="password" />
+
+   <input type="submit">
+</form>
+{{ end }}

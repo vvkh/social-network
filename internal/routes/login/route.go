@@ -1,9 +1,12 @@
 package login
 
-import "net/http"
+import (
+	"html/template"
+	"net/http"
+)
 
-func Handle() http.HandlerFunc {
+func Handle(templates *template.Template) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		_, _ = writer.Write([]byte(`login`))
+		_ = templates.ExecuteTemplate(writer, "login.gohtml", nil)
 	}
 }

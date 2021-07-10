@@ -4,11 +4,12 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
 func Test_Index(t *testing.T) {
-	s := New(":80")
+	s := New(":80", "../../templates")
 
 	request := httptest.NewRequest("GET", "/", nil)
 	responseWriter := httptest.NewRecorder()
@@ -31,7 +32,7 @@ func Test_Index(t *testing.T) {
 }
 
 func Test_Login(t *testing.T) {
-	s := New(":80")
+	s := New(":80", "../../templates")
 
 	request := httptest.NewRequest("GET", "/login/", nil)
 	responseWriter := httptest.NewRecorder()
@@ -47,14 +48,13 @@ func Test_Login(t *testing.T) {
 		t.Error("error while parsing response body")
 	}
 
-	wantBody := "login"
-	if wantBody != string(body) {
-		t.Errorf(`want body = "%s", got = "%s"`, wantBody, body)
+	if !strings.Contains(string(body), "<title>Login</title>") {
+		t.Errorf(`want body to contain HTML with <title>Login</title>, got = "%s"`, body)
 	}
 }
 
 func Test_Register(t *testing.T) {
-	s := New(":80")
+	s := New(":80", "../../templates")
 
 	request := httptest.NewRequest("GET", "/register/", nil)
 	responseWriter := httptest.NewRecorder()
@@ -77,7 +77,7 @@ func Test_Register(t *testing.T) {
 }
 
 func Test_Users(t *testing.T) {
-	s := New(":80")
+	s := New(":80", "../../templates")
 
 	request := httptest.NewRequest("GET", "/users/", nil)
 	responseWriter := httptest.NewRecorder()
@@ -100,7 +100,7 @@ func Test_Users(t *testing.T) {
 }
 
 func Test_Friends(t *testing.T) {
-	s := New(":80")
+	s := New(":80", "../../templates")
 
 	request := httptest.NewRequest("GET", "/friends/", nil)
 	responseWriter := httptest.NewRecorder()
@@ -123,7 +123,7 @@ func Test_Friends(t *testing.T) {
 }
 
 func Test_User(t *testing.T) {
-	s := New(":80")
+	s := New(":80", "../../templates")
 
 	request := httptest.NewRequest("GET", "/users/1", nil)
 	responseWriter := httptest.NewRecorder()

@@ -22,17 +22,18 @@ func NewDefault() (*server, error) {
 	}
 
 	address := os.Getenv("SERVER_ADDRESS")
-	s := New(address)
+	templatesDir := os.Getenv("TEMPLATES_DIR")
+	s := New(address, templatesDir)
 	return s, nil
 }
 
-func New(address string) *server {
+func New(address string, tempalatesDir string) *server {
 	router := chi.NewRouter()
 	s := server{
 		handler: router,
 		address: address,
 	}
-	s.setupRoutes()
+	s.setupRoutes(tempalatesDir)
 	return &s
 }
 
