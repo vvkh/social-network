@@ -1,19 +1,23 @@
-test:
-	go test ./...
+PATH=$$PATH:./bin
+
+install: deps tools
 
 deps:
 	go mod tidy
 	go mod vendor
 
-lint:
-	golangci-lint run ./...
-
 .PHONY:tools
 tools:
 	go generate ./tools
 
+test:
+	go test ./...
+
+lint:
+	golangci-lint run ./...
+
 generate:
-	PATH=$$PATH:./bin go generate ./internal/...
+	 go generate ./internal/...
 
 up:
 	mkdir -p ./bin
