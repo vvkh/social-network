@@ -10,4 +10,5 @@ lint:
 
 make up:
 	mkdir -p ./bin
-	go build -o ./bin/site cmd/site
+	go build -o ./bin/site ./cmd/site
+	./bin/site
