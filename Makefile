@@ -8,7 +8,14 @@ deps:
 lint:
 	golangci-lint run ./...
 
-make up:
+.PHONY:tools
+tools:
+	go generate ./tools
+
+generate:
+	PATH=$$PATH:./bin go generate ./internal/...
+
+up:
 	mkdir -p ./bin
 	go build -o ./bin/site ./cmd/site
 	./bin/site
