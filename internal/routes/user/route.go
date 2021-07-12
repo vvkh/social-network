@@ -1,9 +1,15 @@
 package user
 
-import "net/http"
+import (
+	"net/http"
 
-func Handle() http.HandlerFunc {
+	"github.com/vvkh/social-network/internal/templates"
+)
+
+func Handle(templates *templates.Templates) http.HandlerFunc {
+	render := templates.Add("user.gohtml").Parse()
+
 	return func(writer http.ResponseWriter, request *http.Request) {
-		_, _ = writer.Write([]byte(`user`))
+		_ = render(writer, nil)
 	}
 }

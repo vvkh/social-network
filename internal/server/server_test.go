@@ -8,140 +8,64 @@ import (
 	"testing"
 )
 
-func Test_Index(t *testing.T) {
-	s := New(":80", "../../templates")
-
-	request := httptest.NewRequest("GET", "/", nil)
-	responseWriter := httptest.NewRecorder()
-	s.Handle(responseWriter, request)
-
-	response := responseWriter.Result()
-	if response.StatusCode != http.StatusOK {
-		t.Errorf("GET / status must be 200, got %d", response.StatusCode)
+func TestRoutesSmoke(t *testing.T) {
+	tests := []struct {
+		method        string
+		route         string
+		wantToContain string
+	}{
+		{
+			method:        "GET",
+			route:         "/",
+			wantToContain: "hello world",
+		},
+		{
+			method:        "GET",
+			route:         "/login/",
+			wantToContain: "<title>Login</title>",
+		},
+		{
+			method:        "GET",
+			route:         "/register/",
+			wantToContain: "<title>Register</title>",
+		},
+		{
+			method:        "GET",
+			route:         "/users/",
+			wantToContain: "<title>Users</title>",
+		},
+		{
+			method:        "GET",
+			route:         "/users/1/",
+			wantToContain: "<title>User</title>",
+		},
+		{
+			method:        "GET",
+			route:         "/friends/",
+			wantToContain: "<title>Friends</title>",
+		},
 	}
+	for _, test := range tests {
+		t.Run(test.route, func(t *testing.T) {
+			s := New(":80", "../../templates")
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		t.Error("error while parsing response body")
-	}
+			request := httptest.NewRequest(test.method, test.route, nil)
+			responseWriter := httptest.NewRecorder()
+			s.Handle(responseWriter, request)
 
-	wantBody := "hello world"
-	if wantBody != string(body) {
-		t.Errorf(`want body = "%s", got = "%s"`, wantBody, body)
-	}
-}
+			response := responseWriter.Result()
+			if response.StatusCode != http.StatusOK {
+				t.Errorf("GET %s status must be 200, got %d", test.route, response.StatusCode)
+			}
 
-func Test_Login(t *testing.T) {
-	s := New(":80", "../../templates")
+			body, err := io.ReadAll(response.Body)
+			if err != nil {
+				t.Error("error while parsing response body")
+			}
 
-	request := httptest.NewRequest("GET", "/login/", nil)
-	responseWriter := httptest.NewRecorder()
-	s.Handle(responseWriter, request)
-
-	response := responseWriter.Result()
-	if response.StatusCode != http.StatusOK {
-		t.Errorf("GET /login status must be 200, got %d", response.StatusCode)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		t.Error("error while parsing response body")
-	}
-
-	wantContent := "<title>Login</title>"
-	if !strings.Contains(string(body), wantContent) {
-		t.Errorf(`want body to contain %s, got = "%s"`, wantContent, body)
-	}
-}
-
-func Test_Register(t *testing.T) {
-	s := New(":80", "../../templates")
-
-	request := httptest.NewRequest("GET", "/register/", nil)
-	responseWriter := httptest.NewRecorder()
-	s.Handle(responseWriter, request)
-
-	response := responseWriter.Result()
-	if response.StatusCode != http.StatusOK {
-		t.Errorf("GET /login status must be 200, got %d", response.StatusCode)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		t.Error("error while parsing response body")
-	}
-
-	wantContent := "<title>Register</title>"
-	if !strings.Contains(string(body), wantContent) {
-		t.Errorf(`want body to contain %s, got = "%s"`, wantContent, body)
-	}
-}
-
-func Test_Users(t *testing.T) {
-	s := New(":80", "../../templates")
-
-	request := httptest.NewRequest("GET", "/users/", nil)
-	responseWriter := httptest.NewRecorder()
-	s.Handle(responseWriter, request)
-
-	response := responseWriter.Result()
-	if response.StatusCode != http.StatusOK {
-		t.Errorf("GET /login status must be 200, got %d", response.StatusCode)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		t.Error("error while parsing response body")
-	}
-
-	wantBody := "users"
-	if wantBody != string(body) {
-		t.Errorf(`want body = "%s", got = "%s"`, wantBody, body)
-	}
-}
-
-func Test_Friends(t *testing.T) {
-	s := New(":80", "../../templates")
-
-	request := httptest.NewRequest("GET", "/friends/", nil)
-	responseWriter := httptest.NewRecorder()
-	s.Handle(responseWriter, request)
-
-	response := responseWriter.Result()
-	if response.StatusCode != http.StatusOK {
-		t.Errorf("GET /login status must be 200, got %d", response.StatusCode)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		t.Error("error while parsing response body")
-	}
-
-	wantBody := "friends"
-	if wantBody != string(body) {
-		t.Errorf(`want body = "%s", got = "%s"`, wantBody, body)
-	}
-}
-
-func Test_User(t *testing.T) {
-	s := New(":80", "../../templates")
-
-	request := httptest.NewRequest("GET", "/users/1", nil)
-	responseWriter := httptest.NewRecorder()
-	s.Handle(responseWriter, request)
-
-	response := responseWriter.Result()
-	if response.StatusCode != http.StatusOK {
-		t.Errorf("GET /login status must be 200, got %d", response.StatusCode)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		t.Error("error while parsing response body")
-	}
-
-	wantBody := "user"
-	if wantBody != string(body) {
-		t.Errorf(`want body = "%s", got = "%s"`, wantBody, body)
+			if !strings.Contains(string(body), test.wantToContain) {
+				t.Errorf(`want body to contain "%s", got = "%s"`, test.wantToContain, body)
+			}
+		})
 	}
 }

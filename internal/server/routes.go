@@ -18,10 +18,10 @@ func (s *server) setupRoutes(templatesDir string) {
 	s.handler.Get("/", index.Handle())
 	s.handler.Get("/login/", login.Handle(templates))
 	s.handler.Get("/register/", register.Handle(templates))
-	s.handler.Get("/friends/", friends.Handle())
+	s.handler.Get("/friends/", friends.Handle(templates))
 	s.handler.Route("/users/", func(r chi.Router) {
-		r.Get("/", users.Handle())
-		r.Get("/{userID}", user.Handle())
+		r.Get("/", users.Handle(templates))
+		r.Get("/{userID}/", user.Handle(templates))
 	})
 
 }
