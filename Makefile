@@ -1,5 +1,3 @@
-PATH=$$PATH:./bin
-
 install: deps tools
 
 deps:
@@ -17,7 +15,7 @@ lint:
 	golangci-lint run ./...
 
 generate:
-	 go generate ./internal/...
+	 PATH=$$PATH:./bin go generate ./internal/...
 
 up:
 	mkdir -p ./bin
