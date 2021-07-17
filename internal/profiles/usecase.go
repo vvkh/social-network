@@ -10,5 +10,5 @@ import (
 
 type UseCase interface {
 	CreateProfile(ctx context.Context, firstName string, lastName string, age uint8, location string, sex string, about string) (entity.Profile, error)
-	GetByID(ctx context.Context, id uint64) (entity.Profile, error)
+	GetByID(ctx context.Context, id ...uint64) ([]entity.Profile, error)
 }

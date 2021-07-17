@@ -50,16 +50,21 @@ func (mr *MockUseCaseMockRecorder) CreateProfile(ctx, firstName, lastName, age, 
 }
 
 // GetByID mocks base method
-func (m *MockUseCase) GetByID(ctx context.Context, id uint64) (entity.Profile, error) {
+func (m *MockUseCase) GetByID(ctx context.Context, id ...uint64) ([]entity.Profile, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", ctx, id)
-	ret0, _ := ret[0].(entity.Profile)
+	varargs := []interface{}{ctx}
+	for _, a := range id {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetByID", varargs...)
+	ret0, _ := ret[0].([]entity.Profile)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByID indicates an expected call of GetByID
-func (mr *MockUseCaseMockRecorder) GetByID(ctx, id interface{}) *gomock.Call {
+func (mr *MockUseCaseMockRecorder) GetByID(ctx interface{}, id ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockUseCase)(nil).GetByID), ctx, id)
+	varargs := append([]interface{}{ctx}, id...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockUseCase)(nil).GetByID), varargs...)
 }
