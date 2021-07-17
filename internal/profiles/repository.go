@@ -1,10 +1,14 @@
 package profiles
 
-import "github.com/vvkh/social-network/internal/profiles/entity"
+import (
+	"context"
+
+	"github.com/vvkh/social-network/internal/profiles/entity"
+)
 
 //go:generate mockgen -destination=mocks/repository.go -package=mocks -source=repository.go
 
 type Repository interface {
-	CreateProfile(profile entity.Profile) (uint64, error)
-	GetByID(id uint64) (entity.Profile, error)
+	CreateProfile(ctx context.Context, profile entity.Profile) (uint64, error)
+	GetByID(ctx context.Context, id uint64) (entity.Profile, error)
 }

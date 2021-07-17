@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/vvkh/social-network/internal/profiles/entity"
 	reflect "reflect"
@@ -34,31 +35,31 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // CreateProfile mocks base method
-func (m *MockRepository) CreateProfile(profile entity.Profile) (uint64, error) {
+func (m *MockRepository) CreateProfile(ctx context.Context, profile entity.Profile) (uint64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateProfile", profile)
+	ret := m.ctrl.Call(m, "CreateProfile", ctx, profile)
 	ret0, _ := ret[0].(uint64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateProfile indicates an expected call of CreateProfile
-func (mr *MockRepositoryMockRecorder) CreateProfile(profile interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) CreateProfile(ctx, profile interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProfile", reflect.TypeOf((*MockRepository)(nil).CreateProfile), profile)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProfile", reflect.TypeOf((*MockRepository)(nil).CreateProfile), ctx, profile)
 }
 
 // GetByID mocks base method
-func (m *MockRepository) GetByID(id uint64) (entity.Profile, error) {
+func (m *MockRepository) GetByID(ctx context.Context, id uint64) (entity.Profile, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", id)
+	ret := m.ctrl.Call(m, "GetByID", ctx, id)
 	ret0, _ := ret[0].(entity.Profile)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByID indicates an expected call of GetByID
-func (mr *MockRepositoryMockRecorder) GetByID(id interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetByID(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockRepository)(nil).GetByID), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockRepository)(nil).GetByID), ctx, id)
 }
