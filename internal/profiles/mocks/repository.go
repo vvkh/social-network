@@ -68,3 +68,18 @@ func (mr *MockRepositoryMockRecorder) GetByID(ctx interface{}, id ...interface{}
 	varargs := append([]interface{}{ctx}, id...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockRepository)(nil).GetByID), varargs...)
 }
+
+// GetByUserID mocks base method
+func (m *MockRepository) GetByUserID(ctx context.Context, id uint64) ([]entity.Profile, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByUserID", ctx, id)
+	ret0, _ := ret[0].([]entity.Profile)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByUserID indicates an expected call of GetByUserID
+func (mr *MockRepositoryMockRecorder) GetByUserID(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUserID", reflect.TypeOf((*MockRepository)(nil).GetByUserID), ctx, id)
+}

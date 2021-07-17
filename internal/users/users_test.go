@@ -37,7 +37,7 @@ func TestCreateUserAndLogin(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err = uc.Login(ctx, "johndoe", "topsecret")
+	_, _, err = uc.Login(ctx, "johndoe", "topsecret")
 	require.Equal(t, users.AuthenticationFailed, err)
 
 	createdUserID, profileID, err := uc.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "USA", "male", "")
@@ -58,10 +58,11 @@ func TestCreateUserAndLogin(t *testing.T) {
 	}
 	require.Equal(t, []entity.Profile{wantProfile}, profile)
 
-	loggedInUserID, err := uc.Login(ctx, "johndoe", "topsecret")
+	loggedInUserID, profileIDs, err := uc.Login(ctx, "johndoe", "topsecret")
 	require.NoError(t, err)
 	require.Equal(t, createdUserID, loggedInUserID)
+	require.Equal(t, []uint64{profileID}, profileIDs)
 
-	_, err = uc.Login(ctx, "johndoe", "wrongpassword")
+	_, _, err = uc.Login(ctx, "johndoe", "wrongpassword")
 	require.Equal(t, users.AuthenticationFailed, err)
 }
