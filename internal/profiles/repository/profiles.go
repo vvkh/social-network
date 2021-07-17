@@ -1,10 +1,7 @@
 package repository
 
 import (
-	"fmt"
 	"os"
-
-	"github.com/joho/godotenv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -15,11 +12,6 @@ type repo struct {
 }
 
 func NewDefault() (*repo, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("error while parsing env: %w", err)
-	}
-
 	url := os.Getenv("DB_URL")
 	return New(url)
 }

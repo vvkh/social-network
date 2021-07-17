@@ -2,14 +2,24 @@ package repository
 
 import (
 	"context"
+	"os"
 	"reflect"
 	"testing"
+
+	"github.com/joho/godotenv"
 
 	"github.com/vvkh/social-network/internal/profiles/entity"
 )
 
 func Test_repo_CreateProfile(t *testing.T) {
-
+	err := godotenv.Load("../../../.env")
+	if err != nil {
+		t.Errorf("should not be error while parsing dotenv but got: %v", err)
+		return
+	}
+	if os.Getenv("SKIP_DB_TEST") == "1" {
+		t.SkipNow()
+	}
 	tests := []struct {
 		name    string
 		profile entity.Profile

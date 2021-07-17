@@ -6,8 +6,6 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
-
-	"github.com/joho/godotenv"
 )
 
 type server struct {
@@ -16,11 +14,6 @@ type server struct {
 }
 
 func NewDefault() (*server, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("error while parsing env: %w", err)
-	}
-
 	address := os.Getenv("SERVER_ADDRESS")
 	templatesDir := os.Getenv("TEMPLATES_DIR")
 	s := New(address, templatesDir)

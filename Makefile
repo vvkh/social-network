@@ -9,6 +9,9 @@ tools:
 	go generate ./tools
 
 test:
+	SKIP_DB_TEST=1 go test ./...
+
+test-full:
 	go test ./...
 
 lint:
@@ -27,3 +30,9 @@ db:
 
 migrate:
 	docker-compose up migrate
+
+env:
+	make db
+	sleep 30
+	make migrate
+
