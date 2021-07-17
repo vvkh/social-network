@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/joho/godotenv"
 
 	"github.com/vvkh/social-network/internal/profiles/entity"
@@ -39,27 +41,19 @@ func Test_repo_CreateProfile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r, err := NewDefault()
-			if err != nil {
-				t.Errorf("should not be error while creating repository, but got = %v", err)
-				return
-			}
+			require.NoError(t, err)
 
 			ctx := context.Background()
 			gotID, err := r.CreateProfile(ctx, tt.profile)
-			if err != nil {
-				t.Errorf("should not be error while creating profile, but got = %v", err)
-				return
-			}
+			require.NoError(t, err)
 
 			gotProfile, err := r.GetByID(ctx, gotID)
-			if err != nil {
-				t.Errorf("should not be error while getting profile")
-				return
-			}
+			require.NoError(t, err)
+
 			wantProfile := tt.profile
 			wantProfile.ID = gotID
 
-			if !reflect.DeepEqual(gotProfile, wantProfile) {
+			if !reflect.DeepEqual(gotProfile, []entity.Profile{wantProfile}) {
 				t.Errorf("want profile = %v, gotID = %v", tt.profile, gotProfile)
 			}
 		})

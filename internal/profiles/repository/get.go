@@ -3,18 +3,28 @@ package repository
 import (
 	"context"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/vvkh/social-network/internal/profiles/repository/dto"
 
 	"github.com/vvkh/social-network/internal/profiles/entity"
 )
 
-func (r *repo) GetByID(ctx context.Context, id uint64) (entity.Profile, error) {
-	query := `SELECT * FROM profiles WHERE id = ?`
-
-	var profileDto dto.Profile
-	err := r.db.GetContext(ctx, &profileDto, query, id)
+func (r *repo) GetByID(ctx context.Context, id ...uint64) ([]entity.Profile, error) {
+	query, args, err := sqlx.In(`SELECT * FROM profiles WHERE id in (?)`, id)
 	if err != nil {
-		return entity.Profile{}, nil
+		return nil, err
 	}
-	return dto.ToProfile(profileDto), nil
+
+	var profilesDto []dto.Profile
+	err = r.db.SelectContext(ctx, &profilesDto, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	profiles := make([]entity.Profile, 0, len(profilesDto))
+	for _, profileDto := range profilesDto {
+		profiles = append(profiles, dto.ToProfile(profileDto))
+	}
+	return profiles, nil
 }

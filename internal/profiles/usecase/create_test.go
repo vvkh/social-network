@@ -137,12 +137,12 @@ func Test_usecase_CreateProfile(t *testing.T) {
 				t.Fatalf("CreateProfile() got = %v, want %v", got, tt.want)
 			}
 
-			repoMock.EXPECT().GetByID(ctx, got.ID).Return(got, nil)
+			repoMock.EXPECT().GetByID(ctx, got.ID).Return([]entity.Profile{got}, nil)
 			fetchedByID, err := u.GetByID(ctx, got.ID)
 			if err != nil {
 				t.Fatalf("unexpected error while fetching user: %v", err)
 			}
-			if !reflect.DeepEqual(got, fetchedByID) {
+			if !reflect.DeepEqual([]entity.Profile{got}, fetchedByID) {
 				t.Fatalf("expected to get by id = %v, got = %v", got, fetchedByID)
 			}
 		})

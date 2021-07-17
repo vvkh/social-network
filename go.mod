@@ -9,5 +9,6 @@ require (
 	github.com/golangci/golangci-lint v1.41.1
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/joho/godotenv v1.3.0
+	github.com/stretchr/testify v1.7.0
 	golang.org/x/tools v0.1.3
 )
