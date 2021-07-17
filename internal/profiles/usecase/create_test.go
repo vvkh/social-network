@@ -1,14 +1,14 @@
 package usecase
 
 import (
+	"context"
 	"reflect"
 	"testing"
-
-	"github.com/vvkh/social-network/internal/profiles/mocks"
 
 	"github.com/golang/mock/gomock"
 
 	"github.com/vvkh/social-network/internal/profiles/entity"
+	"github.com/vvkh/social-network/internal/profiles/mocks"
 )
 
 func Test_usecase_CreateProfile(t *testing.T) {
@@ -120,10 +120,11 @@ func Test_usecase_CreateProfile(t *testing.T) {
 			repoMock := mocks.NewMockRepository(ctrl)
 			u := New(repoMock)
 
+			ctx := context.Background()
 			if tt.repoMockCreateResponse != 0 {
-				repoMock.EXPECT().CreateProfile(gomock.Any()).Return(tt.repoMockCreateResponse, nil)
+				repoMock.EXPECT().CreateProfile(ctx, gomock.Any()).Return(tt.repoMockCreateResponse, nil)
 			}
-			got, err := u.CreateProfile(tt.args.firstName, tt.args.lastName, tt.args.age, tt.args.location, tt.args.sex, tt.args.about)
+			got, err := u.CreateProfile(ctx, tt.args.firstName, tt.args.lastName, tt.args.age, tt.args.location, tt.args.sex, tt.args.about)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("CreateProfile() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -136,8 +137,8 @@ func Test_usecase_CreateProfile(t *testing.T) {
 				t.Fatalf("CreateProfile() got = %v, want %v", got, tt.want)
 			}
 
-			repoMock.EXPECT().GetByID(got.ID).Return(got, nil)
-			fetchedByID, err := u.GetByID(got.ID)
+			repoMock.EXPECT().GetByID(ctx, got.ID).Return(got, nil)
+			fetchedByID, err := u.GetByID(ctx, got.ID)
 			if err != nil {
 				t.Fatalf("unexpected error while fetching user: %v", err)
 			}

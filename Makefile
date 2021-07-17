@@ -21,3 +21,9 @@ up:
 	mkdir -p ./bin
 	go build -o ./bin/site ./cmd/site
 	./bin/site
+
+db:
+	docker-compose up -d db
+
+migrate:
+	docker-compose up migrate
