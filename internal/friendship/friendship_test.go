@@ -5,16 +5,16 @@ import (
 	"os"
 	"testing"
 
-	"github.com/vvkh/social-network/internal/profiles/entity"
-
-	"github.com/stretchr/testify/require"
-
 	"github.com/joho/godotenv"
+	"github.com/stretchr/testify/require"
 
 	"github.com/vvkh/social-network/internal/friendship/repository"
 	"github.com/vvkh/social-network/internal/friendship/usecase"
+	"github.com/vvkh/social-network/internal/profiles/entity"
 	profilesRepository "github.com/vvkh/social-network/internal/profiles/repository"
 	profilesUseCase "github.com/vvkh/social-network/internal/profiles/usecase"
+	usersRepository "github.com/vvkh/social-network/internal/users/repository"
+	usersUseCase "github.com/vvkh/social-network/internal/users/usecase"
 )
 
 func TestAcceptFriendshipRequest(t *testing.T) {
@@ -29,6 +29,11 @@ func TestAcceptFriendshipRequest(t *testing.T) {
 
 	profilesUC := profilesUseCase.New(profileRepo)
 
+	usersRepo, err := usersRepository.NewDefault()
+	require.NoError(t, err)
+
+	usersUC := usersUseCase.New(profilesUC, usersRepo)
+
 	repo, err := repository.NewDefault()
 	require.NoError(t, err)
 
@@ -36,11 +41,19 @@ func TestAcceptFriendshipRequest(t *testing.T) {
 
 	ctx := context.Background()
 
-	john, err := profilesUC.CreateProfile(ctx, "John", "Doe", 18, "", "male", "")
+	_, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
 	require.NoError(t, err)
 
-	topsy, err := profilesUC.CreateProfile(ctx, "Topsy", "Cret", 18, "", "male", "")
+	profiles, err := profilesUC.GetByID(ctx, johnProfileID)
 	require.NoError(t, err)
+	john := profiles[0]
+
+	_, topsyProfileID, err := usersUC.CreateUser(ctx, "topsycret", "topsecret", "Topsy", "Cret", 18, "", "male", "")
+	require.NoError(t, err)
+
+	profiles, err = profilesUC.GetByID(ctx, topsyProfileID)
+	require.NoError(t, err)
+	topsy := profiles[0]
 
 	friends, err := uc.ListFriends(ctx, topsy.ID)
 	require.NoError(t, err)
@@ -85,6 +98,11 @@ func TestDeclineFriendshipRequest(t *testing.T) {
 
 	profilesUC := profilesUseCase.New(profileRepo)
 
+	usersRepo, err := usersRepository.NewDefault()
+	require.NoError(t, err)
+
+	usersUC := usersUseCase.New(profilesUC, usersRepo)
+
 	repo, err := repository.NewDefault()
 	require.NoError(t, err)
 
@@ -92,11 +110,19 @@ func TestDeclineFriendshipRequest(t *testing.T) {
 
 	ctx := context.Background()
 
-	john, err := profilesUC.CreateProfile(ctx, "John", "Doe", 18, "", "male", "")
+	_, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
 	require.NoError(t, err)
 
-	topsy, err := profilesUC.CreateProfile(ctx, "Topsy", "Cret", 18, "", "male", "")
+	profiles, err := profilesUC.GetByID(ctx, johnProfileID)
 	require.NoError(t, err)
+	john := profiles[0]
+
+	_, topsyProfileID, err := usersUC.CreateUser(ctx, "topsycret", "topsecret", "Topsy", "Cret", 18, "", "male", "")
+	require.NoError(t, err)
+
+	profiles, err = profilesUC.GetByID(ctx, topsyProfileID)
+	require.NoError(t, err)
+	topsy := profiles[0]
 
 	friends, err := uc.ListFriends(ctx, topsy.ID)
 	require.NoError(t, err)
@@ -145,6 +171,11 @@ func TestStopFriendship(t *testing.T) {
 
 	profilesUC := profilesUseCase.New(profileRepo)
 
+	usersRepo, err := usersRepository.NewDefault()
+	require.NoError(t, err)
+
+	usersUC := usersUseCase.New(profilesUC, usersRepo)
+
 	repo, err := repository.NewDefault()
 	require.NoError(t, err)
 
@@ -152,11 +183,19 @@ func TestStopFriendship(t *testing.T) {
 
 	ctx := context.Background()
 
-	john, err := profilesUC.CreateProfile(ctx, "John", "Doe", 18, "", "male", "")
+	_, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
 	require.NoError(t, err)
 
-	topsy, err := profilesUC.CreateProfile(ctx, "Topsy", "Cret", 18, "", "male", "")
+	profiles, err := profilesUC.GetByID(ctx, johnProfileID)
 	require.NoError(t, err)
+	john := profiles[0]
+
+	_, topsyProfileID, err := usersUC.CreateUser(ctx, "topsycret", "topsecret", "Topsy", "Cret", 18, "", "male", "")
+	require.NoError(t, err)
+
+	profiles, err = profilesUC.GetByID(ctx, topsyProfileID)
+	require.NoError(t, err)
+	topsy := profiles[0]
 
 	err = uc.CreateRequest(ctx, john.ID, topsy.ID)
 	require.NoError(t, err)

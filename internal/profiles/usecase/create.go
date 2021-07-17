@@ -7,7 +7,7 @@ import (
 	"github.com/vvkh/social-network/internal/profiles/entity"
 )
 
-func (u *usecase) CreateProfile(ctx context.Context, firstName string, lastName string, age uint8, location string, sex string, about string) (entity.Profile, error) {
+func (u *usecase) CreateProfile(ctx context.Context, userID uint64, firstName string, lastName string, age uint8, location string, sex string, about string) (entity.Profile, error) {
 	if firstName == "" {
 		return entity.Profile{}, fmt.Errorf("first name cant be empty")
 	}
@@ -21,6 +21,7 @@ func (u *usecase) CreateProfile(ctx context.Context, firstName string, lastName 
 		return entity.Profile{}, fmt.Errorf("invalid sex %s", sex)
 	}
 	profile := entity.Profile{
+		UserID:    userID,
 		FirstName: firstName,
 		LastName:  lastName,
 		Age:       age,
