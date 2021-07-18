@@ -11,4 +11,5 @@ import (
 type Repository interface {
 	CreateProfile(ctx context.Context, profile entity.Profile) (uint64, error)
 	GetByID(ctx context.Context, id ...uint64) ([]entity.Profile, error)
+	GetByUserID(ctx context.Context, id uint64) ([]entity.Profile, error)
 }

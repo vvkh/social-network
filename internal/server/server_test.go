@@ -31,13 +31,13 @@ func TestRoutesSmoke(t *testing.T) {
 		},
 		{
 			method:        "GET",
-			route:         "/users/",
-			wantToContain: "<title>Users</title>",
+			route:         "/profiles/",
+			wantToContain: "<title>Profiles</title>",
 		},
 		{
 			method:        "GET",
-			route:         "/users/1/",
-			wantToContain: "<title>User</title>",
+			route:         "/profiles/1/",
+			wantToContain: "<title>Profile</title>",
 		},
 		{
 			method:        "GET",

@@ -13,6 +13,7 @@ import (
 
 func Test_usecase_CreateProfile(t *testing.T) {
 	type args struct {
+		userID    uint64
 		firstName string
 		lastName  string
 		age       uint8
@@ -30,6 +31,7 @@ func Test_usecase_CreateProfile(t *testing.T) {
 		{
 			name: "empty_name",
 			args: args{
+				userID:   1,
 				lastName: "Doe",
 				age:      16,
 				sex:      "male",
@@ -39,6 +41,7 @@ func Test_usecase_CreateProfile(t *testing.T) {
 		{
 			name: "empty_last_name",
 			args: args{
+				userID:    1,
 				firstName: "John",
 				age:       16,
 				sex:       "male",
@@ -48,6 +51,7 @@ func Test_usecase_CreateProfile(t *testing.T) {
 		{
 			name: "empty_age",
 			args: args{
+				userID:    1,
 				firstName: "John",
 				lastName:  "Doe",
 				sex:       "male",
@@ -57,6 +61,7 @@ func Test_usecase_CreateProfile(t *testing.T) {
 		{
 			name: "empty_sex",
 			args: args{
+				userID:    1,
 				firstName: "John",
 				lastName:  "Doe",
 				age:       16,
@@ -66,6 +71,7 @@ func Test_usecase_CreateProfile(t *testing.T) {
 		{
 			name: "invalid_sex",
 			args: args{
+				userID:    1,
 				firstName: "John",
 				lastName:  "Doe",
 				age:       16,
@@ -76,6 +82,7 @@ func Test_usecase_CreateProfile(t *testing.T) {
 		{
 			name: "valid_female",
 			args: args{
+				userID:    1,
 				firstName: "Johna",
 				lastName:  "Doe",
 				age:       16,
@@ -84,6 +91,7 @@ func Test_usecase_CreateProfile(t *testing.T) {
 			repoMockCreateResponse: 42,
 			wantErr:                false,
 			want: entity.Profile{
+				UserID:    1,
 				ID:        42,
 				FirstName: "Johna",
 				LastName:  "Doe",
@@ -96,6 +104,7 @@ func Test_usecase_CreateProfile(t *testing.T) {
 		{
 			name: "valid_male",
 			args: args{
+				userID:    1,
 				firstName: "John",
 				lastName:  "Doe",
 				age:       16,
@@ -104,6 +113,7 @@ func Test_usecase_CreateProfile(t *testing.T) {
 			repoMockCreateResponse: 42,
 			wantErr:                false,
 			want: entity.Profile{
+				UserID:    1,
 				ID:        42,
 				FirstName: "John",
 				LastName:  "Doe",
@@ -124,7 +134,7 @@ func Test_usecase_CreateProfile(t *testing.T) {
 			if tt.repoMockCreateResponse != 0 {
 				repoMock.EXPECT().CreateProfile(ctx, gomock.Any()).Return(tt.repoMockCreateResponse, nil)
 			}
-			got, err := u.CreateProfile(ctx, tt.args.firstName, tt.args.lastName, tt.args.age, tt.args.location, tt.args.sex, tt.args.about)
+			got, err := u.CreateProfile(ctx, tt.args.userID, tt.args.firstName, tt.args.lastName, tt.args.age, tt.args.location, tt.args.sex, tt.args.about)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("CreateProfile() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -140,7 +150,7 @@ func Test_usecase_CreateProfile(t *testing.T) {
 			repoMock.EXPECT().GetByID(ctx, got.ID).Return([]entity.Profile{got}, nil)
 			fetchedByID, err := u.GetByID(ctx, got.ID)
 			if err != nil {
-				t.Fatalf("unexpected error while fetching user: %v", err)
+				t.Fatalf("unexpected error while fetching profile: %v", err)
 			}
 			if !reflect.DeepEqual([]entity.Profile{got}, fetchedByID) {
 				t.Fatalf("expected to get by id = %v, got = %v", got, fetchedByID)

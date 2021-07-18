@@ -6,8 +6,8 @@ import (
 	"github.com/vvkh/social-network/internal/profiles/entity"
 )
 
-func (u *usecase) ListFriends(ctx context.Context, userID uint64) ([]entity.Profile, error) {
-	friendIDs, err := u.repo.ListFriends(ctx, userID)
+func (u *usecase) ListFriends(ctx context.Context, profileID uint64) ([]entity.Profile, error) {
+	friendIDs, err := u.repo.ListFriends(ctx, profileID)
 	if err != nil {
 		return nil, err
 	}

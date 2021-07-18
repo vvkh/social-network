@@ -1,4 +1,4 @@
-package user
+package profile
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 )
 
 func Handle(templates *templates.Templates) http.HandlerFunc {
-	render := templates.Add("user.gohtml").Parse()
+	render := templates.Add("profile.gohtml").Parse()
 
 	return func(writer http.ResponseWriter, request *http.Request) {
 		_ = render(writer, nil)

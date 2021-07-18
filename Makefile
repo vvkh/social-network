@@ -26,6 +26,7 @@ up:
 	./bin/site
 
 db:
+	docker-compose down
 	docker-compose up -d db
 
 migrate:

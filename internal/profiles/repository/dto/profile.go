@@ -10,11 +10,13 @@ type Profile struct {
 	Sex       string `db:"sex"`
 	About     string `db:"about"`
 	Location  string `db:"location"`
+	UserID    uint64 `db:"user_id"`
 }
 
 func FromProfile(model entity.Profile) Profile {
 	return Profile{
 		ID:        model.ID,
+		UserID:    model.UserID,
 		FirstName: model.FirstName,
 		LastName:  model.LastName,
 		Age:       model.Age,
@@ -27,6 +29,7 @@ func FromProfile(model entity.Profile) Profile {
 func ToProfile(dto Profile) entity.Profile {
 	return entity.Profile{
 		ID:        dto.ID,
+		UserID:    dto.UserID,
 		FirstName: dto.FirstName,
 		LastName:  dto.LastName,
 		Age:       dto.Age,
