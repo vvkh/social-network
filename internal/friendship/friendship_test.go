@@ -41,15 +41,17 @@ func TestAcceptFriendshipRequest(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
+	johnUserID, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
 	require.NoError(t, err)
+	defer usersUC.DeleteUser(ctx, johnUserID) //nolint:errcheck
 
 	profiles, err := profilesUC.GetByID(ctx, johnProfileID)
 	require.NoError(t, err)
 	john := profiles[0]
 
-	_, topsyProfileID, err := usersUC.CreateUser(ctx, "topsycret", "topsecret", "Topsy", "Cret", 18, "", "male", "")
+	topsyUserID, topsyProfileID, err := usersUC.CreateUser(ctx, "topsycret", "topsecret", "Topsy", "Cret", 18, "", "male", "")
 	require.NoError(t, err)
+	defer usersUC.DeleteUser(ctx, topsyUserID) //nolint:errcheck
 
 	profiles, err = profilesUC.GetByID(ctx, topsyProfileID)
 	require.NoError(t, err)
@@ -110,15 +112,17 @@ func TestDeclineFriendshipRequest(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
+	johnUserID, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
 	require.NoError(t, err)
+	defer usersUC.DeleteUser(ctx, johnUserID) //nolint:errcheck
 
 	profiles, err := profilesUC.GetByID(ctx, johnProfileID)
 	require.NoError(t, err)
 	john := profiles[0]
 
-	_, topsyProfileID, err := usersUC.CreateUser(ctx, "topsycret", "topsecret", "Topsy", "Cret", 18, "", "male", "")
+	topsyUserID, topsyProfileID, err := usersUC.CreateUser(ctx, "topsycret", "topsecret", "Topsy", "Cret", 18, "", "male", "")
 	require.NoError(t, err)
+	defer usersUC.DeleteUser(ctx, topsyUserID) //nolint:errcheck
 
 	profiles, err = profilesUC.GetByID(ctx, topsyProfileID)
 	require.NoError(t, err)
@@ -183,15 +187,17 @@ func TestStopFriendship(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
+	johnUserID, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
 	require.NoError(t, err)
+	defer usersUC.DeleteUser(ctx, johnUserID) //nolint:errcheck
 
 	profiles, err := profilesUC.GetByID(ctx, johnProfileID)
 	require.NoError(t, err)
 	john := profiles[0]
 
-	_, topsyProfileID, err := usersUC.CreateUser(ctx, "topsycret", "topsecret", "Topsy", "Cret", 18, "", "male", "")
+	topsyUserID, topsyProfileID, err := usersUC.CreateUser(ctx, "topsycret", "topsecret", "Topsy", "Cret", 18, "", "male", "")
 	require.NoError(t, err)
+	defer usersUC.DeleteUser(ctx, topsyUserID) //nolint:errcheck
 
 	profiles, err = profilesUC.GetByID(ctx, topsyProfileID)
 	require.NoError(t, err)

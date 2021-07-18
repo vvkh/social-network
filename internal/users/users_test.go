@@ -37,14 +37,12 @@ func TestCreateUserAndLogin(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err = uc.Login(ctx, "johndoe", "topsecret")
+	_, err = uc.Login(ctx, "johndoe1", "topsecret")
 	require.Equal(t, users.AuthenticationFailed, err)
 
-	createdUserID, profileID, err := uc.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "USA", "male", "")
+	createdUserID, profileID, err := uc.CreateUser(ctx, "johndoe1", "topsecret", "John", "Doe", 18, "USA", "male", "")
 	require.NoError(t, err)
-	defer func() {
-		_ = uc.DeleteUser(ctx, createdUserID)
-	}()
+	defer uc.DeleteUser(ctx, createdUserID) //nolint:errcheck
 
 	profile, err := profilesUC.GetByID(ctx, profileID)
 	require.NoError(t, err)
@@ -60,7 +58,7 @@ func TestCreateUserAndLogin(t *testing.T) {
 	}
 	require.Equal(t, []entity.Profile{wantProfile}, profile)
 
-	rawToken, err := uc.Login(ctx, "johndoe", "topsecret")
+	rawToken, err := uc.Login(ctx, "johndoe1", "topsecret")
 	require.NoError(t, err)
 
 	token, err := uc.DecodeToken(ctx, rawToken)
@@ -70,6 +68,6 @@ func TestCreateUserAndLogin(t *testing.T) {
 	require.Equal(t, createdUserID, loggedInUserID)
 	require.Equal(t, profileID, gotProfileID)
 
-	_, err = uc.Login(ctx, "johndoe", "wrongpassword")
+	_, err = uc.Login(ctx, "johndoe1", "wrongpassword")
 	require.Equal(t, users.AuthenticationFailed, err)
 }

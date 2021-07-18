@@ -1,6 +1,6 @@
 create table if not exists users (
     id serial primary key,
-    username varchar(100),
+    username varchar(100) unique,
     password binary(60) -- 60 is max size for bcrypt hash
 );
 
