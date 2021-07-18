@@ -33,11 +33,11 @@ func TestCreateUserAndLogin(t *testing.T) {
 	repo, err := repository.NewDefault()
 	require.NoError(t, err)
 
-	uc := usecase.New(profilesUC, repo)
+	uc := usecase.New(profilesUC, repo, "secret")
 
 	ctx := context.Background()
 
-	_, _, err = uc.Login(ctx, "johndoe", "topsecret")
+	_, err = uc.Login(ctx, "johndoe", "topsecret")
 	require.Equal(t, users.AuthenticationFailed, err)
 
 	createdUserID, profileID, err := uc.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "USA", "male", "")
@@ -58,11 +58,16 @@ func TestCreateUserAndLogin(t *testing.T) {
 	}
 	require.Equal(t, []entity.Profile{wantProfile}, profile)
 
-	loggedInUserID, profileIDs, err := uc.Login(ctx, "johndoe", "topsecret")
+	rawToken, err := uc.Login(ctx, "johndoe", "topsecret")
 	require.NoError(t, err)
-	require.Equal(t, createdUserID, loggedInUserID)
-	require.Equal(t, []uint64{profileID}, profileIDs)
 
-	_, _, err = uc.Login(ctx, "johndoe", "wrongpassword")
+	token, err := uc.DecodeToken(ctx, rawToken)
+	require.NoError(t, err)
+
+	loggedInUserID, gotProfileID := token.UserID, token.ProfileID
+	require.Equal(t, createdUserID, loggedInUserID)
+	require.Equal(t, profileID, gotProfileID)
+
+	_, err = uc.Login(ctx, "johndoe", "wrongpassword")
 	require.Equal(t, users.AuthenticationFailed, err)
 }

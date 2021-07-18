@@ -82,6 +82,9 @@ github.com/gobwas/glob/util/runes
 github.com/gobwas/glob/util/strings
 # github.com/gofrs/flock v0.8.0
 github.com/gofrs/flock
+# github.com/golang-jwt/jwt v3.2.1+incompatible
+## explicit
+github.com/golang-jwt/jwt
 # github.com/golang/mock v1.6.0
 ## explicit
 github.com/golang/mock/gomock
