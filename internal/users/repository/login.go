@@ -12,7 +12,7 @@ func (r *repo) Login(ctx context.Context, username string, password string) (uin
 	query := `
     SELECT id, password FROM users WHERE username = ?`
 	var user struct {
-		ID       uint64 `db:"id""`
+		ID       uint64 `db:"id"`
 		Password []byte `db:"password"`
 	}
 	err := r.db.GetContext(ctx, &user, query, username)

@@ -26,9 +26,9 @@ func TestAccessToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			token := AccessToken{
-				UserID:     tt.userID,
-				ProfileIDs: tt.profileID,
-				ExpiresAt:  tt.expiresAt,
+				UserID:    tt.userID,
+				ProfileID: tt.profileID,
+				ExpiresAt: tt.expiresAt,
 			}
 			rawToken, err := token.ToString(tt.key)
 			require.NoError(t, err)

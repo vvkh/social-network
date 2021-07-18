@@ -42,7 +42,9 @@ func TestCreateUserAndLogin(t *testing.T) {
 
 	createdUserID, profileID, err := uc.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "USA", "male", "")
 	require.NoError(t, err)
-	defer uc.DeleteUser(ctx, createdUserID)
+	defer func() {
+		_ = uc.DeleteUser(ctx, createdUserID)
+	}()
 
 	profile, err := profilesUC.GetByID(ctx, profileID)
 	require.NoError(t, err)

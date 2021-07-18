@@ -32,7 +32,7 @@ func TestAcceptFriendshipRequest(t *testing.T) {
 	usersRepo, err := usersRepository.NewDefault()
 	require.NoError(t, err)
 
-	usersUC := usersUseCase.New(profilesUC, usersRepo)
+	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
 
 	repo, err := repository.NewDefault()
 	require.NoError(t, err)
@@ -101,7 +101,7 @@ func TestDeclineFriendshipRequest(t *testing.T) {
 	usersRepo, err := usersRepository.NewDefault()
 	require.NoError(t, err)
 
-	usersUC := usersUseCase.New(profilesUC, usersRepo)
+	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
 
 	repo, err := repository.NewDefault()
 	require.NoError(t, err)
@@ -174,7 +174,7 @@ func TestStopFriendship(t *testing.T) {
 	usersRepo, err := usersRepository.NewDefault()
 	require.NoError(t, err)
 
-	usersUC := usersUseCase.New(profilesUC, usersRepo)
+	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
 
 	repo, err := repository.NewDefault()
 	require.NoError(t, err)
