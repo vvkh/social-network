@@ -6,6 +6,10 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+
+	"github.com/vvkh/social-network/internal/users/mocks"
 )
 
 func TestRoutesSmoke(t *testing.T) {
@@ -47,7 +51,9 @@ func TestRoutesSmoke(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.route, func(t *testing.T) {
-			s := New(":80", "../../templates")
+			ctrl := gomock.NewController(t)
+			usersUseCase := mocks.NewMockUseCase(ctrl)
+			s := New(":80", "../../templates", usersUseCase)
 
 			request := httptest.NewRequest(test.method, test.route, nil)
 			responseWriter := httptest.NewRecorder()

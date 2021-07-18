@@ -6,6 +6,8 @@ import (
 	"github.com/vvkh/social-network/internal/users/entity"
 )
 
+//go:generate mockgen -destination=mocks/usecase.go -package=mocks -source=usecase.go
+
 type UseCase interface {
 	CreateUser(ctx context.Context, username string, password string, firstName string, lastName string, age uint8, location string, sex string, about string) (uint64, uint64, error)
 	Login(ctx context.Context, username string, password string) (string, error)

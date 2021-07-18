@@ -1,14 +1,15 @@
 {{ define "title"}}Register{{end}}
 
 {{ define "content" }}
-<form>
+<form method="POST">
    <!-- TODO: add CSRF token -->
    <label for="username">Username</label>
-   <input id="username" type="text" placeholder="John Doe" />
+   <input id="username" name="username" type="text" placeholder="John Doe" />
 
    <label for="password">Password</label>
-   <input id="password" type="password" />
+   <input id="password" name="password" type="password" />
 
+   <!-- TODO: add profile info -->
    <input type="submit">
 </form>
 {{ end }}

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/vvkh/social-network/internal/users"
+
 	"github.com/go-chi/chi/v5"
 )
 
@@ -13,20 +15,20 @@ type server struct {
 	address string
 }
 
-func NewDefault() (*server, error) {
+func NewFromEnv(usersUseCase users.UseCase) (*server, error) {
 	address := os.Getenv("SERVER_ADDRESS")
 	templatesDir := os.Getenv("TEMPLATES_DIR")
-	s := New(address, templatesDir)
+	s := New(address, templatesDir, usersUseCase)
 	return s, nil
 }
 
-func New(address string, tempalatesDir string) *server {
+func New(address string, tempalatesDir string, usersUseCase users.UseCase) *server {
 	router := chi.NewRouter()
 	s := server{
 		handler: router,
 		address: address,
 	}
-	s.setupRoutes(tempalatesDir)
+	s.setupRoutes(tempalatesDir, usersUseCase)
 	return &s
 }
 
