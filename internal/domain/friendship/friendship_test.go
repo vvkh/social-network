@@ -21,7 +21,7 @@ func TestAcceptFriendshipRequest(t *testing.T) {
 	if os.Getenv("SKIP_DB_TEST") == "1" {
 		t.SkipNow()
 	}
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load("../../../.env")
 	require.NoError(t, err)
 
 	profileRepo, err := profilesRepository.NewDefault()
@@ -92,7 +92,7 @@ func TestDeclineFriendshipRequest(t *testing.T) {
 	if os.Getenv("SKIP_DB_TEST") == "1" {
 		t.SkipNow()
 	}
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load("../../../.env")
 	require.NoError(t, err)
 
 	profileRepo, err := profilesRepository.NewDefault()
@@ -167,7 +167,7 @@ func TestStopFriendship(t *testing.T) {
 	if os.Getenv("SKIP_DB_TEST") == "1" {
 		t.SkipNow()
 	}
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load("../../../.env")
 	require.NoError(t, err)
 
 	profileRepo, err := profilesRepository.NewDefault()
