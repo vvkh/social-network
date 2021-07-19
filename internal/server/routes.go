@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/middlewares"
 	"github.com/vvkh/social-network/internal/permissions"
 	"github.com/vvkh/social-network/internal/routes/friends"
@@ -15,7 +16,6 @@ import (
 	"github.com/vvkh/social-network/internal/routes/profiles"
 	"github.com/vvkh/social-network/internal/routes/register"
 	"github.com/vvkh/social-network/internal/templates"
-	"github.com/vvkh/social-network/internal/users"
 )
 
 const defaultHandlerTimeout = 60 * time.Second

@@ -6,11 +6,11 @@ import (
 
 	"github.com/joho/godotenv"
 
-	profilesRepository "github.com/vvkh/social-network/internal/profiles/repository"
-	profilesUseCase "github.com/vvkh/social-network/internal/profiles/usecase"
+	profilesRepository "github.com/vvkh/social-network/internal/domain/profiles/repository"
+	profilesUseCase "github.com/vvkh/social-network/internal/domain/profiles/usecase"
+	usersRepository "github.com/vvkh/social-network/internal/domain/users/repository"
+	usersUseCase "github.com/vvkh/social-network/internal/domain/users/usecase"
 	"github.com/vvkh/social-network/internal/server"
-	usersRepository "github.com/vvkh/social-network/internal/users/repository"
-	usersUseCase "github.com/vvkh/social-network/internal/users/usecase"
 )
 
 func main() {

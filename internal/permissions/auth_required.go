@@ -3,8 +3,8 @@ package permissions
 import (
 	"net/http"
 
+	"github.com/vvkh/social-network/internal/domain/users/entity"
 	"github.com/vvkh/social-network/internal/middlewares"
-	"github.com/vvkh/social-network/internal/users/entity"
 )
 
 func AuthRequired(redirectPath string) func(http.Handler) http.HandlerFunc {

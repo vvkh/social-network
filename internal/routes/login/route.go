@@ -3,8 +3,8 @@ package login
 import (
 	"net/http"
 
+	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/templates"
-	"github.com/vvkh/social-network/internal/users"
 )
 
 func HandleGet(templates *templates.Templates) http.HandlerFunc {

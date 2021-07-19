@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/vvkh/social-network/internal/users"
+	"github.com/vvkh/social-network/internal/domain/users"
 )
 
 const (

@@ -7,13 +7,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/vvkh/social-network/internal/users/entity"
+	"github.com/vvkh/social-network/internal/domain/users/entity"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/golang/mock/gomock"
 
-	"github.com/vvkh/social-network/internal/users/mocks"
+	"github.com/vvkh/social-network/internal/domain/users/mocks"
 )
 
 func TestRoutesSmoke(t *testing.T) {
