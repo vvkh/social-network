@@ -5,15 +5,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/vvkh/social-network/internal/domain/profiles/entity"
-
-	"github.com/vvkh/social-network/internal/domain/users"
-
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 
+	"github.com/vvkh/social-network/internal/domain/profiles/entity"
 	profilesRepository "github.com/vvkh/social-network/internal/domain/profiles/repository"
 	profilesUseCase "github.com/vvkh/social-network/internal/domain/profiles/usecase"
+	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/domain/users/repository"
 	"github.com/vvkh/social-network/internal/domain/users/usecase"
 )

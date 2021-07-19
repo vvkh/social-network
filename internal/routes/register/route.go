@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/vvkh/social-network/internal/domain/users"
-
 	"github.com/vvkh/social-network/internal/templates"
 )
 

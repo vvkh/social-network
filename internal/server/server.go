@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/vvkh/social-network/internal/domain/users"
-
 	"github.com/go-chi/chi/v5"
+
+	"github.com/vvkh/social-network/internal/domain/users"
 )
 
 type server struct {

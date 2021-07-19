@@ -5,9 +5,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/vvkh/social-network/internal/domain/profiles/repository/dto"
-
 	"github.com/vvkh/social-network/internal/domain/profiles/entity"
+	"github.com/vvkh/social-network/internal/domain/profiles/repository/dto"
 )
 
 func (r *repo) GetByID(ctx context.Context, id ...uint64) ([]entity.Profile, error) {

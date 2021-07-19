@@ -3,8 +3,6 @@ package server
 import (
 	"time"
 
-	"github.com/vvkh/social-network/internal/routes/logout"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
@@ -14,6 +12,7 @@ import (
 	"github.com/vvkh/social-network/internal/routes/friends"
 	"github.com/vvkh/social-network/internal/routes/index"
 	"github.com/vvkh/social-network/internal/routes/login"
+	"github.com/vvkh/social-network/internal/routes/logout"
 	"github.com/vvkh/social-network/internal/routes/profile"
 	"github.com/vvkh/social-network/internal/routes/profiles"
 	"github.com/vvkh/social-network/internal/routes/register"
