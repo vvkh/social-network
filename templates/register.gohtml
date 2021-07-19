@@ -1,14 +1,35 @@
 {{ define "title"}}Register{{end}}
 
 {{ define "content" }}
-<form>
+<form method="POST">
    <!-- TODO: add CSRF token -->
    <label for="username">Username</label>
-   <input id="username" type="text" placeholder="John Doe" />
+   <input id="username" name="username" type="text" placeholder="johndoe" required/><br/>
 
    <label for="password">Password</label>
-   <input id="password" type="password" />
+   <input id="password" name="password" type="password" /><br/>
 
+
+   <label for="first_name">First Name</label>
+   <input id="first_name" name="first_name" type="text" placeholder="John" required/><br/>
+
+   <label for="last_name">Last Name</label>
+   <input id="last_name" name="last_name" type="text" placeholder="Doe" required/><br/>
+
+   <label for="age">Age</label>
+   <input id="age" name="age" type="number" min="0" max="100" placeholder="30" required/><br/>
+
+   <label for="sex">Sex</label>
+   <select id="sex" name="sex" required>
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+   </select><br/>
+
+   <label for="Location">Location</label>
+   <input id="location" name="location" type="text" placeholder="USA" /><br/>
+
+   <label for="about">About</label>
+   <textarea id="about" name="about" placeholder="A few words about me..."></textarea><br/>
    <input type="submit">
 </form>
 {{ end }}
