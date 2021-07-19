@@ -8,8 +8,10 @@ import (
 	"github.com/vvkh/social-network/internal/domain/users"
 )
 
+type ctxKey int
+
 const (
-	CtxKeyToken = 1
+	CtxKeyToken = ctxKey(1)
 )
 
 func AuthenticateUser(users users.UseCase) func(http.Handler) http.Handler {
