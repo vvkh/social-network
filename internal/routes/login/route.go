@@ -1,12 +1,10 @@
 package login
 
 import (
-	"fmt"
 	"net/http"
 
-	"github.com/vvkh/social-network/internal/users"
-
 	"github.com/vvkh/social-network/internal/templates"
+	"github.com/vvkh/social-network/internal/users"
 )
 
 func HandleGet(templates *templates.Templates) http.HandlerFunc {
@@ -30,8 +28,14 @@ func HandlePost(useCase users.UseCase) http.HandlerFunc {
 			return
 		}
 
-		// TODO: http only cookies
-		writer.Header().Set("Set-Cookie", fmt.Sprintf("token=%s", token))
+		// TODO: extract cookie generation
+		cookie := http.Cookie{
+			Name:     "token",
+			Value:    token,
+			Path:     "/",
+			HttpOnly: true,
+		}
+		writer.Header().Set("Set-Cookie", cookie.String())
 		writer.WriteHeader(http.StatusOK)
 	}
 }
