@@ -3,6 +3,8 @@ package login
 import (
 	"net/http"
 
+	"github.com/vvkh/social-network/internal/cookies"
+
 	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/templates"
 )
@@ -28,14 +30,7 @@ func HandlePost(useCase users.UseCase, redirectPath string) http.HandlerFunc {
 			return
 		}
 
-		// TODO: extract cookie generation
-		cookie := http.Cookie{
-			Name:     "token",
-			Value:    token,
-			Path:     "/",
-			HttpOnly: true,
-		}
-		writer.Header().Set("Set-Cookie", cookie.String())
+		http.SetCookie(writer, cookies.AuthCookie(token))
 		http.Redirect(writer, request, redirectPath, http.StatusFound)
 	}
 }

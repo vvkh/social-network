@@ -3,6 +3,8 @@ package server
 import (
 	"time"
 
+	"github.com/vvkh/social-network/internal/routes/logout"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
@@ -39,6 +41,7 @@ func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase) {
 		r.Get("/", login.HandleGet(templates))
 		r.Post("/", login.HandlePost(usersUseCase, "/"))
 	})
+	s.handler.Get("/logout/", logout.HandleGet("/"))
 	s.handler.Route("/register/", func(r chi.Router) {
 		r.Get("/", register.HandleGet(templates))
 		r.Post("/", register.HandlePost(usersUseCase, "/login/"))
