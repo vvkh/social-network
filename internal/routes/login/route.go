@@ -15,7 +15,7 @@ func HandleGet(templates *templates.Templates) http.HandlerFunc {
 	}
 }
 
-func HandlePost(useCase users.UseCase) http.HandlerFunc {
+func HandlePost(useCase users.UseCase, redirectPath string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		// TODO: error handling
 		_ = request.ParseForm()
@@ -36,6 +36,6 @@ func HandlePost(useCase users.UseCase) http.HandlerFunc {
 			HttpOnly: true,
 		}
 		writer.Header().Set("Set-Cookie", cookie.String())
-		writer.WriteHeader(http.StatusOK)
+		http.Redirect(writer, request, redirectPath, http.StatusFound)
 	}
 }

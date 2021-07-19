@@ -18,7 +18,9 @@ import (
 	"github.com/vvkh/social-network/internal/templates"
 )
 
-const defaultHandlerTimeout = 60 * time.Second
+const (
+	defaultHandlerTimeout = 60 * time.Second
+)
 
 func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase) {
 	templates := templates.New(templatesDir, "bootstrap").Add("base.gohtml")
@@ -35,11 +37,11 @@ func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase) {
 	s.handler.Get("/", authRequired(index.Handle()))
 	s.handler.Route("/login/", func(r chi.Router) {
 		r.Get("/", login.HandleGet(templates))
-		r.Post("/", login.HandlePost(usersUseCase))
+		r.Post("/", login.HandlePost(usersUseCase, "/"))
 	})
 	s.handler.Route("/register/", func(r chi.Router) {
 		r.Get("/", register.HandleGet(templates))
-		r.Post("/", register.HandlePost(usersUseCase))
+		r.Post("/", register.HandlePost(usersUseCase, "/login/"))
 	})
 	s.handler.Get("/friends/", authRequired(friends.Handle(templates)))
 	s.handler.Route("/profiles/", func(r chi.Router) {
