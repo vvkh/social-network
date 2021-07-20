@@ -10,18 +10,25 @@
     <nav>
         Menu
         <ul>
-            <li>
-                <a href="/login/">Login</a>
-            </li>
-            <li>
-                <a href="/register/">Register</a>
-            </li>
-            <li>
-                <a href="/logout/">Logout</a>
-            </li>
+            {{ if .UserID }}
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                <li>
+                    <a href="/logout/">Logout</a>
+                </li>
+            {{ else }}
+                <li>
+                    <a href="/login/">Login</a>
+                </li>
+                <li>
+                    <a href="/register/">Register</a>
+                </li>
+            {{ end }}
+
         </ul>
     </nav>
-    {{ template "content" }}
+    {{ template "content" . }}
 </body>
 </html>
 {{ end }}

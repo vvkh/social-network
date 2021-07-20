@@ -1,5 +1,10 @@
 {{ define "title"}}Profile{{end}}
 
 {{ define "content" }}
-User page
+    <h1>{{ .FirstName }} {{ .LastName }}</h1>
+    {{ .Age }}, {{ .Sex }}, {{ .Location }} <br/>
+    {{ if .About }}
+        <h2>About me</h2>
+        {{ .About }}
+    {{ end }}
 {{ end }}

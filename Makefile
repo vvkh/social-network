@@ -17,6 +17,10 @@ test-full:
 lint:
 	golangci-lint run ./...
 
+fmt:
+	go fmt ./cmd/... ./internal/...
+	goimports -ungroup -local github.com/vvkh/social-network -w ./cmd ./internal
+
 generate:
 	 PATH=$$PATH:./bin go generate ./internal/...
 

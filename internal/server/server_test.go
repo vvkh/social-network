@@ -10,6 +10,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
+	profilesEntity "github.com/vvkh/social-network/internal/domain/profiles/entity"
+	profilesMock "github.com/vvkh/social-network/internal/domain/profiles/mocks"
 	"github.com/vvkh/social-network/internal/domain/users/entity"
 	"github.com/vvkh/social-network/internal/domain/users/mocks"
 )
@@ -63,7 +65,8 @@ func TestRoutesSmoke(t *testing.T) {
 		t.Run(test.route, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			usersUseCase := mocks.NewMockUseCase(ctrl)
-			s := New(":80", "../../templates", usersUseCase)
+			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase)
 
 			request := httptest.NewRequest(test.method, test.route, nil)
 			responseWriter := httptest.NewRecorder()
@@ -91,15 +94,18 @@ func TestRoutesSmokeWithAuthentication(t *testing.T) {
 	tests := []struct {
 		method        string
 		route         string
+		profileID     uint64
+		userID        uint64
 		wantStatus    int
 		wantHeaders   map[string]string
 		wantToContain string
 	}{
 		{
-			method:        "GET",
-			route:         "/",
-			wantStatus:    http.StatusOK,
-			wantToContain: "hello world",
+			method:      "GET",
+			route:       "/",
+			profileID:   2,
+			wantStatus:  http.StatusFound,
+			wantHeaders: map[string]string{"Location": "/profiles/2/"},
 		},
 		{
 			method:        "GET",
@@ -121,9 +127,10 @@ func TestRoutesSmokeWithAuthentication(t *testing.T) {
 		},
 		{
 			method:        "GET",
-			route:         "/profiles/1/",
+			profileID:     2,
+			route:         "/profiles/2/",
 			wantStatus:    http.StatusOK,
-			wantToContain: "<title>Profile</title>",
+			wantToContain: "<h1>John Snow</h1>",
 		},
 		{
 			method:        "GET",
@@ -136,9 +143,19 @@ func TestRoutesSmokeWithAuthentication(t *testing.T) {
 		t.Run(test.route, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			usersUseCase := mocks.NewMockUseCase(ctrl)
-			usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(entity.AccessToken{UserID: 1, ProfileID: 2}, nil)
+			usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(entity.AccessToken{UserID: test.userID, ProfileID: test.profileID}, nil)
 
-			s := New(":80", "../../templates", usersUseCase)
+			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
+			profilesUseCase.EXPECT().GetByID(gomock.Any(), test.profileID).Return([]profilesEntity.Profile{
+				{
+					ID:        test.userID,
+					UserID:    test.profileID,
+					FirstName: "John",
+					LastName:  "Snow",
+				},
+			}, nil).AnyTimes()
+
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase)
 
 			request := httptest.NewRequest(test.method, test.route, nil)
 			request.AddCookie(&http.Cookie{

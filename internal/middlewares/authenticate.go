@@ -6,6 +6,7 @@ import (
 
 	"github.com/vvkh/social-network/internal/cookies"
 	"github.com/vvkh/social-network/internal/domain/users"
+	"github.com/vvkh/social-network/internal/domain/users/entity"
 )
 
 type ctxKey int
@@ -37,4 +38,9 @@ func AuthenticateUser(users users.UseCase) func(http.Handler) http.Handler {
 		}
 		return http.HandlerFunc(fn)
 	}
+}
+
+func TokenFromCtx(ctx context.Context) (entity.AccessToken, bool) {
+	token, ok := ctx.Value(CtxKeyToken).(entity.AccessToken)
+	return token, ok
 }
