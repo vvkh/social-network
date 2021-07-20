@@ -50,5 +50,4 @@ func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase) {
 		r.Get("/", authRequired(profiles.Handle(templates)))
 		r.Get("/{profileID}/", authRequired(profile.Handle(templates)))
 	})
-
 }

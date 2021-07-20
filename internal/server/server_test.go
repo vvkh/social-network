@@ -96,10 +96,10 @@ func TestRoutesSmokeWithAuthentication(t *testing.T) {
 		wantToContain string
 	}{
 		{
-			method:        "GET",
-			route:         "/",
-			wantStatus:    http.StatusOK,
-			wantToContain: "hello world",
+			method:      "GET",
+			route:       "/",
+			wantStatus:  http.StatusFound,
+			wantHeaders: map[string]string{"Location": "/profiles/2/"},
 		},
 		{
 			method:        "GET",
