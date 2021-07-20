@@ -39,7 +39,7 @@ func run() error {
 	}
 
 	usersUC := usersUseCase.NewFromEnv(profilesUC, usersRepo)
-	s, err := server.NewFromEnv(usersUC)
+	s, err := server.NewFromEnv(usersUC, profilesUC)
 	if err != nil {
 		return err
 	}

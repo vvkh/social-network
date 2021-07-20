@@ -11,6 +11,7 @@ func AuthRequired(redirectPath string) func(http.Handler) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			if _, ok := middlewares.TokenFromCtx(r.Context()); !ok {
 				http.Redirect(w, r, redirectPath, http.StatusFound)
+				return
 			}
 
 			next.ServeHTTP(w, r)

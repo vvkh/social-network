@@ -6,11 +6,9 @@ package mocks
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
-
 	entity "github.com/vvkh/social-network/internal/domain/profiles/entity"
+	reflect "reflect"
 )
 
 // MockUseCase is a mock of UseCase interface
@@ -37,18 +35,18 @@ func (m *MockUseCase) EXPECT() *MockUseCaseMockRecorder {
 }
 
 // CreateProfile mocks base method
-func (m *MockUseCase) CreateProfile(ctx context.Context, firstName, lastName string, age uint8, location, sex, about string) (entity.Profile, error) {
+func (m *MockUseCase) CreateProfile(ctx context.Context, userID uint64, firstName, lastName string, age uint8, location, sex, about string) (entity.Profile, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateProfile", ctx, firstName, lastName, age, location, sex, about)
+	ret := m.ctrl.Call(m, "CreateProfile", ctx, userID, firstName, lastName, age, location, sex, about)
 	ret0, _ := ret[0].(entity.Profile)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateProfile indicates an expected call of CreateProfile
-func (mr *MockUseCaseMockRecorder) CreateProfile(ctx, firstName, lastName, age, location, sex, about interface{}) *gomock.Call {
+func (mr *MockUseCaseMockRecorder) CreateProfile(ctx, userID, firstName, lastName, age, location, sex, about interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProfile", reflect.TypeOf((*MockUseCase)(nil).CreateProfile), ctx, firstName, lastName, age, location, sex, about)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProfile", reflect.TypeOf((*MockUseCase)(nil).CreateProfile), ctx, userID, firstName, lastName, age, location, sex, about)
 }
 
 // GetByID mocks base method
@@ -69,4 +67,19 @@ func (mr *MockUseCaseMockRecorder) GetByID(ctx interface{}, id ...interface{}) *
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx}, id...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockUseCase)(nil).GetByID), varargs...)
+}
+
+// GetByUserID mocks base method
+func (m *MockUseCase) GetByUserID(ctx context.Context, id uint64) ([]entity.Profile, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByUserID", ctx, id)
+	ret0, _ := ret[0].([]entity.Profile)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByUserID indicates an expected call of GetByUserID
+func (mr *MockUseCaseMockRecorder) GetByUserID(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUserID", reflect.TypeOf((*MockUseCase)(nil).GetByUserID), ctx, id)
 }
