@@ -33,7 +33,7 @@ func TestProfiles(t *testing.T) {
 	uc := usersUseCase.New(profilesUC, repo, "secret")
 
 	ctx := context.Background()
-	johnID, johnProfileID, err := uc.CreateUser(ctx, "johndoe", "123", "john", "doe", 18, "USA", "male", "")
+	johnID, johnProfileID, err := uc.CreateUser(ctx, "johndoe_profiles", "123", "john", "doe", 18, "USA", "male", "")
 	require.NoError(t, err)
 	defer uc.DeleteUser(ctx, johnID) //nolint:errcheck
 
