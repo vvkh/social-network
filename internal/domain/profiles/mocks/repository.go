@@ -6,11 +6,9 @@ package mocks
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
-
 	entity "github.com/vvkh/social-network/internal/domain/profiles/entity"
+	reflect "reflect"
 )
 
 // MockRepository is a mock of Repository interface
@@ -84,4 +82,19 @@ func (m *MockRepository) GetByUserID(ctx context.Context, id uint64) ([]entity.P
 func (mr *MockRepositoryMockRecorder) GetByUserID(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUserID", reflect.TypeOf((*MockRepository)(nil).GetByUserID), ctx, id)
+}
+
+// ListProfiles mocks base method
+func (m *MockRepository) ListProfiles(ctx context.Context) ([]entity.Profile, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListProfiles", ctx)
+	ret0, _ := ret[0].([]entity.Profile)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListProfiles indicates an expected call of ListProfiles
+func (mr *MockRepositoryMockRecorder) ListProfiles(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProfiles", reflect.TypeOf((*MockRepository)(nil).ListProfiles), ctx)
 }

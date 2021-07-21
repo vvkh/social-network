@@ -21,9 +21,5 @@ func (r *repo) GetByID(ctx context.Context, id ...uint64) ([]entity.Profile, err
 		return nil, err
 	}
 
-	profiles := make([]entity.Profile, 0, len(profilesDto))
-	for _, profileDto := range profilesDto {
-		profiles = append(profiles, dto.ToProfile(profileDto))
-	}
-	return profiles, nil
+	return dto.ToProfiles(profilesDto), nil
 }
