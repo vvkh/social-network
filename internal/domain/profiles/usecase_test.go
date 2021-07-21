@@ -42,6 +42,8 @@ func TestProfiles(t *testing.T) {
 	defer uc.DeleteUser(ctx, topsyID) //nolint:errcheck
 
 	profiles, err := profilesUC.ListProfiles(ctx)
+	require.NoError(t, err)
+
 	wantProfiles := []entity.Profile{
 		{
 			ID:        johnProfileID,

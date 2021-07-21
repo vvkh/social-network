@@ -3,13 +3,30 @@ package profiles
 import (
 	"net/http"
 
+	"github.com/vvkh/social-network/internal/domain/profiles"
+	"github.com/vvkh/social-network/internal/middlewares"
 	"github.com/vvkh/social-network/internal/templates"
 )
 
-func Handle(templates *templates.Templates) http.HandlerFunc {
+func Handle(profilesUseCase profiles.UseCase, templates *templates.Templates) http.HandlerFunc {
 	render := templates.Add("profiles.gohtml").Parse()
 
 	return func(writer http.ResponseWriter, request *http.Request) {
-		_ = render(writer, nil)
+		token, _ := middlewares.TokenFromCtx(request.Context())
+
+		profiles, err := profilesUseCase.ListProfiles(request.Context())
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		context := Context{
+			UserID:   token.UserID,
+			Profiles: make([]Dto, 0, len(profiles)),
+		}
+		for _, profile := range profiles {
+			context.Profiles = append(context.Profiles, dtoFromModel(profile))
+		}
+
+		_ = render(writer, context)
 	}
 }

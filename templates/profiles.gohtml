@@ -1,5 +1,12 @@
 {{ define "title"}}Profiles{{end}}
 
 {{ define "content" }}
-Users page
+    <h1>Users</h1>
+    <ul>
+    {{ range .Profiles }}
+        <li>
+            <a href="{{ printf "/profiles/%d/" .ID }}">{{ .FirstName }} {{ .LastName }}</a>
+        </li>
+    {{ end }}
+    </ul>
 {{ end }}
