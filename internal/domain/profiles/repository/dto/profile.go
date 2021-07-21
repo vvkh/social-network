@@ -38,3 +38,11 @@ func ToProfile(dto Profile) entity.Profile {
 		Location:  dto.Location,
 	}
 }
+
+func ToProfiles(dtos []Profile) []entity.Profile {
+	profiles := make([]entity.Profile, 0, len(dtos))
+	for _, dto := range dtos {
+		profiles = append(profiles, ToProfile(dto))
+	}
+	return profiles
+}

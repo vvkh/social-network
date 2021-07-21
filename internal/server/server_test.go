@@ -121,9 +121,10 @@ func TestRoutesSmokeWithAuthentication(t *testing.T) {
 		},
 		{
 			method:        "GET",
+			profileID:     2,
 			route:         "/profiles/",
 			wantStatus:    http.StatusOK,
-			wantToContain: "<title>Profiles</title>",
+			wantToContain: `<a href="/profiles/2/">John Snow</a>`,
 		},
 		{
 			method:        "GET",
@@ -145,15 +146,16 @@ func TestRoutesSmokeWithAuthentication(t *testing.T) {
 			usersUseCase := mocks.NewMockUseCase(ctrl)
 			usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(entity.AccessToken{UserID: test.userID, ProfileID: test.profileID}, nil)
 
+			sampleProfile := profilesEntity.Profile{
+				ID:        test.profileID,
+				UserID:    test.userID,
+				FirstName: "John",
+				LastName:  "Snow",
+			}
 			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
-			profilesUseCase.EXPECT().GetByID(gomock.Any(), test.profileID).Return([]profilesEntity.Profile{
-				{
-					ID:        test.userID,
-					UserID:    test.profileID,
-					FirstName: "John",
-					LastName:  "Snow",
-				},
-			}, nil).AnyTimes()
+			profilesUseCase.EXPECT().GetByID(gomock.Any(), test.profileID).Return([]profilesEntity.Profile{sampleProfile}, nil).AnyTimes()
+
+			profilesUseCase.EXPECT().ListProfiles(gomock.Any()).Return([]profilesEntity.Profile{sampleProfile}, nil).AnyTimes()
 
 			s := New(":80", "../../templates", usersUseCase, profilesUseCase)
 

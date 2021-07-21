@@ -48,7 +48,7 @@ func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase, pr
 	})
 	s.handler.Get("/friends/", authRequired(friends.Handle(templates)))
 	s.handler.Route("/profiles/", func(r chi.Router) {
-		r.Get("/", authRequired(profiles.Handle(templates)))
+		r.Get("/", authRequired(profiles.Handle(profilesUseCase, templates)))
 		r.Get("/{profileID:[0-9]+}/", authRequired(profile.Handle(profilesUseCase, templates)))
 	})
 }

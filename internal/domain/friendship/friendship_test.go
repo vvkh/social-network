@@ -41,7 +41,7 @@ func TestAcceptFriendshipRequest(t *testing.T) {
 
 	ctx := context.Background()
 
-	johnUserID, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
+	johnUserID, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe_friendship", "topsecret", "John", "Doe", 18, "", "male", "")
 	require.NoError(t, err)
 	defer usersUC.DeleteUser(ctx, johnUserID) //nolint:errcheck
 
@@ -112,7 +112,7 @@ func TestDeclineFriendshipRequest(t *testing.T) {
 
 	ctx := context.Background()
 
-	johnUserID, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
+	johnUserID, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe_friendship", "topsecret", "John", "Doe", 18, "", "male", "")
 	require.NoError(t, err)
 	defer usersUC.DeleteUser(ctx, johnUserID) //nolint:errcheck
 
@@ -187,7 +187,7 @@ func TestStopFriendship(t *testing.T) {
 
 	ctx := context.Background()
 
-	johnUserID, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe", "topsecret", "John", "Doe", 18, "", "male", "")
+	johnUserID, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe_friendship", "topsecret", "John", "Doe", 18, "", "male", "")
 	require.NoError(t, err)
 	defer usersUC.DeleteUser(ctx, johnUserID) //nolint:errcheck
 
