@@ -13,7 +13,6 @@ import (
 func Handle(profiles profiles.UseCase, templates *templates.Templates) http.HandlerFunc {
 	render := templates.Add("profile.gohtml").Parse()
 
-	// TODO: store profile id in jwt or just use GetByUserID?
 	return func(writer http.ResponseWriter, request *http.Request) {
 		profileID, err := strconv.Atoi(chi.URLParam(request, "profileID"))
 		if err != nil {
