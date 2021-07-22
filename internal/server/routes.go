@@ -32,7 +32,7 @@ func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase, pr
 	s.handler.Use(middleware.Logger)
 	s.handler.Use(middleware.Recoverer)
 	s.handler.Use(middleware.Timeout(defaultHandlerTimeout))
-	s.handler.Use(middlewares.AuthenticateUser(usersUseCase))
+	s.handler.Use(middlewares.AuthenticateUser(usersUseCase, profilesUseCase))
 
 	authRequired := permissions.AuthRequired("/login/")
 

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/vvkh/social-network/internal/cookies"
+	"github.com/vvkh/social-network/internal/domain/profiles"
 	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/domain/users/entity"
 )
@@ -15,7 +16,7 @@ const (
 	CtxKeyToken = ctxKey(1)
 )
 
-func AuthenticateUser(users users.UseCase) func(http.Handler) http.Handler {
+func AuthenticateUser(usersUseCase users.UseCase, profilesUseCase profiles.UseCase) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			encodedToken, err := cookies.ReadAuthCookie(r)
@@ -25,15 +26,29 @@ func AuthenticateUser(users users.UseCase) func(http.Handler) http.Handler {
 			}
 
 			ctx := r.Context()
-			token, err := users.DecodeToken(ctx, encodedToken.Value)
+			token, err := usersUseCase.DecodeToken(ctx, encodedToken.Value)
 			if err != nil {
 				http.SetCookie(w, cookies.EmptyAuthCookie)
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			ctx = context.WithValue(ctx, CtxKeyToken, token)
-			r = r.WithContext(ctx)
+			profiles, err := profilesUseCase.GetByUserID(ctx, token.UserID)
+			if err != nil {
+				// we are not sure that profile doesn't exist, maybe it's just some temporary problem
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			for _, profile := range profiles {
+				if profile.UserID == token.UserID && profile.ID == token.ProfileID {
+					ctx = context.WithValue(ctx, CtxKeyToken, token)
+					r = r.WithContext(ctx)
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+			http.SetCookie(w, cookies.EmptyAuthCookie)
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
