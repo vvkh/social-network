@@ -12,7 +12,7 @@ func Handle(profilesUseCase profiles.UseCase, templates *templates.Templates) ht
 	render := templates.Add("profiles.gohtml").Parse()
 
 	return func(writer http.ResponseWriter, request *http.Request) {
-		token, _ := middlewares.TokenFromCtx(request.Context())
+		profile, _ := middlewares.ProfileFromCtx(request.Context())
 
 		profiles, err := profilesUseCase.ListProfiles(request.Context())
 		if err != nil {
@@ -20,7 +20,7 @@ func Handle(profilesUseCase profiles.UseCase, templates *templates.Templates) ht
 			return
 		}
 		context := Context{
-			UserID:   token.UserID,
+			UserID:   profile.UserID,
 			Profiles: make([]Dto, 0, len(profiles)),
 		}
 		for _, profile := range profiles {

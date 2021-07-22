@@ -6,14 +6,14 @@ import (
 
 	"github.com/vvkh/social-network/internal/cookies"
 	"github.com/vvkh/social-network/internal/domain/profiles"
+	profilesEntity "github.com/vvkh/social-network/internal/domain/profiles/entity"
 	"github.com/vvkh/social-network/internal/domain/users"
-	"github.com/vvkh/social-network/internal/domain/users/entity"
 )
 
 type ctxKey int
 
 const (
-	CtxKeyToken = ctxKey(1)
+	CtxKeyProfile = ctxKey(1)
 )
 
 func AuthenticateUser(usersUseCase users.UseCase, profilesUseCase profiles.UseCase) func(http.Handler) http.Handler {
@@ -42,7 +42,7 @@ func AuthenticateUser(usersUseCase users.UseCase, profilesUseCase profiles.UseCa
 
 			for _, profile := range profiles {
 				if profile.UserID == token.UserID && profile.ID == token.ProfileID {
-					ctx = context.WithValue(ctx, CtxKeyToken, token)
+					ctx = context.WithValue(ctx, CtxKeyProfile, profile)
 					r = r.WithContext(ctx)
 					next.ServeHTTP(w, r)
 					return
@@ -55,7 +55,7 @@ func AuthenticateUser(usersUseCase users.UseCase, profilesUseCase profiles.UseCa
 	}
 }
 
-func TokenFromCtx(ctx context.Context) (entity.AccessToken, bool) {
-	token, ok := ctx.Value(CtxKeyToken).(entity.AccessToken)
-	return token, ok
+func ProfileFromCtx(ctx context.Context) (profilesEntity.Profile, bool) {
+	profile, ok := ctx.Value(CtxKeyProfile).(profilesEntity.Profile)
+	return profile, ok
 }

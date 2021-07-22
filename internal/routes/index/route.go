@@ -9,7 +9,7 @@ import (
 
 func Handle() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		token, _ := middlewares.TokenFromCtx(request.Context())
-		http.Redirect(writer, request, fmt.Sprintf("/profiles/%d/", token.ProfileID), http.StatusFound)
+		profile, _ := middlewares.ProfileFromCtx(request.Context())
+		http.Redirect(writer, request, fmt.Sprintf("/profiles/%d/", profile.ID), http.StatusFound)
 	}
 }
