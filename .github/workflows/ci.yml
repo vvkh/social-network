@@ -18,3 +18,5 @@ jobs:
       - name: test-full
         run: |
           make test-full
+      - name: upload coverage to Codecov
+        uses: codecov/codecov-action@v1
