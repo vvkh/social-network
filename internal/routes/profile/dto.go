@@ -2,7 +2,13 @@ package profile
 
 import "github.com/vvkh/social-network/internal/domain/profiles/entity"
 
-type Dto struct {
+type Context struct {
+	Self    ProfileDto
+	Profile ProfileDto
+}
+
+type ProfileDto struct {
+	ID        uint64
 	UserID    uint64
 	FirstName string
 	LastName  string
@@ -12,8 +18,9 @@ type Dto struct {
 	Location  string
 }
 
-func dtoFromModel(profile entity.Profile) Dto {
-	return Dto{
+func dtoFromModel(profile entity.Profile) ProfileDto {
+	return ProfileDto{
+		ID:        profile.ID,
 		UserID:    profile.UserID,
 		FirstName: profile.FirstName,
 		LastName:  profile.LastName,

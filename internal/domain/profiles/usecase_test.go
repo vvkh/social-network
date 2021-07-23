@@ -44,27 +44,25 @@ func TestProfiles(t *testing.T) {
 	profiles, err := profilesUC.ListProfiles(ctx)
 	require.NoError(t, err)
 
-	wantProfiles := []entity.Profile{
-		{
-			ID:        johnProfileID,
-			UserID:    johnID,
-			FirstName: "john",
-			LastName:  "doe",
-			Age:       18,
-			Sex:       "male",
-			Location:  "USA",
-		},
-		{
-			ID:        topsyProfileID,
-			UserID:    topsyID,
-			FirstName: "topsy",
-			LastName:  "cret",
-			Age:       19,
-			Sex:       "male",
-			About:     "",
-			Location:  "USA",
-		},
+	wantJohnProfile := entity.Profile{
+		ID:        johnProfileID,
+		UserID:    johnID,
+		FirstName: "john",
+		LastName:  "doe",
+		Age:       18,
+		Sex:       "male",
+		Location:  "USA",
 	}
-	require.Equal(t, wantProfiles, profiles)
-
+	wantTopsyProfile := entity.Profile{
+		ID:        topsyProfileID,
+		UserID:    topsyID,
+		FirstName: "topsy",
+		LastName:  "cret",
+		Age:       19,
+		Sex:       "male",
+		About:     "",
+		Location:  "USA",
+	}
+	require.Contains(t, profiles, wantJohnProfile)
+	require.Contains(t, profiles, wantTopsyProfile)
 }
