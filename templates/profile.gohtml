@@ -1,10 +1,17 @@
 {{ define "title"}}Profile{{end}}
 
 {{ define "content" }}
-    <h1>{{ .FirstName }} {{ .LastName }}</h1>
-    {{ .Age }}, {{ .Sex }}, {{ .Location }} <br/>
-    {{ if .About }}
-        <h2>About me</h2>
-        {{ .About }}
+    {{ with .Profile }}
+        <h1>{{ .FirstName }} {{ .LastName }}</h1>
+        {{ .Age }}, {{ .Sex }}, {{ .Location }} <br/>
+        {{ if .About }}
+            <h2>About me</h2>
+            {{ .About }}
+        {{ end }}
+    {{ end }}
+    {{ if ne .Profile.ID .Self.ID }}
+        <form method="POST" action="friendship/">
+            <input type="submit" value="request friendship">
+        </form>
     {{ end }}
 {{ end }}

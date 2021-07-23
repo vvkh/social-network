@@ -20,13 +20,16 @@ func Handle(profilesUseCase profiles.UseCase, templates *templates.Templates) ht
 			return
 		}
 		context := Context{
-			UserID:   profile.UserID,
+			Self:     dtoFromModel(profile),
 			Profiles: make([]Dto, 0, len(profiles)),
 		}
 		for _, profile := range profiles {
 			context.Profiles = append(context.Profiles, dtoFromModel(profile))
 		}
 
-		_ = render(writer, context)
+		err = render(writer, context)
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }

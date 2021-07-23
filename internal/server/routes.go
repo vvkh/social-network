@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/vvkh/social-network/internal/domain/friendship"
 	profilesDomain "github.com/vvkh/social-network/internal/domain/profiles"
 	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/middlewares"
@@ -24,7 +25,7 @@ const (
 	defaultHandlerTimeout = 60 * time.Second
 )
 
-func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase, profilesUseCase profilesDomain.UseCase) {
+func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase, profilesUseCase profilesDomain.UseCase, friendshipUseCase friendship.UseCase) {
 	templates := templates.New(templatesDir, "bootstrap").Add("base.gohtml")
 
 	s.handler.Use(middleware.RequestID)
@@ -50,5 +51,6 @@ func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase, pr
 	s.handler.Route("/profiles/", func(r chi.Router) {
 		r.Get("/", authRequired(profiles.Handle(profilesUseCase, templates)))
 		r.Get("/{profileID:[0-9]+}/", authRequired(profile.Handle(profilesUseCase, templates)))
+		r.Post("/{profileID:[0-9]+}/friendship/", authRequired(profile.HandlePost(friendshipUseCase)))
 	})
 }

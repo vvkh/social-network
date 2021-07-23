@@ -11,6 +11,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
+	friendshipMock "github.com/vvkh/social-network/internal/domain/friendship/mocks"
 	profilesEntity "github.com/vvkh/social-network/internal/domain/profiles/entity"
 	profilesMock "github.com/vvkh/social-network/internal/domain/profiles/mocks"
 	"github.com/vvkh/social-network/internal/domain/users/entity"
@@ -67,7 +68,8 @@ func TestRoutesSmoke(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			usersUseCase := mocks.NewMockUseCase(ctrl)
 			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
-			s := New(":80", "../../templates", usersUseCase, profilesUseCase)
+			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
 
 			request := httptest.NewRequest(test.method, test.route, nil)
 			responseWriter := httptest.NewRecorder()
@@ -157,8 +159,8 @@ func TestRoutesSmokeWithAuthentication(t *testing.T) {
 			profilesUseCase.EXPECT().GetByID(gomock.Any(), test.profileID).Return([]profilesEntity.Profile{sampleProfile}, nil).AnyTimes()
 			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.userID).Return([]profilesEntity.Profile{sampleProfile}, nil).AnyTimes()
 			profilesUseCase.EXPECT().ListProfiles(gomock.Any()).Return([]profilesEntity.Profile{sampleProfile}, nil).AnyTimes()
-
-			s := New(":80", "../../templates", usersUseCase, profilesUseCase)
+			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
 
 			request := httptest.NewRequest(test.method, test.route, nil)
 			request.AddCookie(&http.Cookie{
@@ -275,8 +277,8 @@ func TestRoutesSmokeWithInvalidAuthenticationToken(t *testing.T) {
 			usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(test.mocksToken, nil)
 			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
 			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.mocksToken.UserID).Return(test.getProfileMockResponse, test.getProfileMockErr)
-
-			s := New(":80", "../../templates", usersUseCase, profilesUseCase)
+			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
 
 			request := httptest.NewRequest(test.method, test.route, nil)
 			request.AddCookie(&http.Cookie{
@@ -302,6 +304,116 @@ func TestRoutesSmokeWithInvalidAuthenticationToken(t *testing.T) {
 			require.NoError(t, err)
 
 			require.Contains(t, string(body), test.wantToContain)
+		})
+	}
+}
+
+func TestProfilePage(t *testing.T) {
+	tests := []struct {
+		name       string
+		profile    profilesEntity.Profile
+		self       profilesEntity.Profile
+		url        string
+		wantStatus int
+		wantBody   string
+	}{
+		{
+			name: "profile_page_contains_friendship_request",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url:        "/profiles/1/",
+			wantStatus: http.StatusOK,
+			wantBody:   `<input type="submit" value="request friendship">`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			usersUseCase := mocks.NewMockUseCase(ctrl)
+			usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(entity.AccessToken{UserID: test.self.UserID, ProfileID: test.self.ID}, nil)
+			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
+			profilesUseCase.EXPECT().GetByID(gomock.Any(), test.profile.ID).Return([]profilesEntity.Profile{test.profile}, nil).AnyTimes()
+			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.self.UserID).Return([]profilesEntity.Profile{test.self}, nil).AnyTimes()
+			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
+
+			request := httptest.NewRequest("GET", test.url, nil)
+			request.AddCookie(&http.Cookie{
+				Name:     "token",
+				Value:    "secret",
+				Path:     "/",
+				HttpOnly: true,
+			})
+			responseWriter := httptest.NewRecorder()
+			s.Handle(responseWriter, request)
+
+			response := responseWriter.Result()
+			require.Equal(t, test.wantStatus, response.StatusCode)
+
+			body, err := io.ReadAll(response.Body)
+			require.NoError(t, err)
+
+			require.Contains(t, string(body), test.wantBody)
+		})
+	}
+}
+
+func TestProfilePageFriendshipRequest(t *testing.T) {
+	tests := []struct {
+		name       string
+		profile    profilesEntity.Profile
+		self       profilesEntity.Profile
+		url        string
+		wantStatus int
+	}{
+		{
+			name: "submit_friendship_form",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url:        "/profiles/1/friendship/",
+			wantStatus: http.StatusFound,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			usersUseCase := mocks.NewMockUseCase(ctrl)
+			usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(entity.AccessToken{UserID: test.self.UserID, ProfileID: test.self.ID}, nil)
+			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
+			profilesUseCase.EXPECT().GetByID(gomock.Any(), test.profile.ID).Return([]profilesEntity.Profile{test.profile}, nil).AnyTimes()
+			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.self.UserID).Return([]profilesEntity.Profile{test.self}, nil).AnyTimes()
+			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			friendshipUseCase.EXPECT().CreateRequest(gomock.Any(), test.self.ID, test.profile.ID).Return(nil)
+
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
+
+			request := httptest.NewRequest("POST", test.url, nil)
+			request.AddCookie(&http.Cookie{
+				Name:     "token",
+				Value:    "secret",
+				Path:     "/",
+				HttpOnly: true,
+			})
+			responseWriter := httptest.NewRecorder()
+			s.Handle(responseWriter, request)
+
+			response := responseWriter.Result()
+			require.Equal(t, test.wantStatus, response.StatusCode)
 		})
 	}
 }
