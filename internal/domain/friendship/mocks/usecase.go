@@ -6,11 +6,9 @@ package mocks
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
-
 	entity "github.com/vvkh/social-network/internal/domain/profiles/entity"
+	reflect "reflect"
 )
 
 // MockUseCase is a mock of UseCase interface
@@ -64,6 +62,21 @@ func (m *MockUseCase) ListPendingRequests(ctx context.Context, profileID uint64)
 func (mr *MockUseCaseMockRecorder) ListPendingRequests(ctx, profileID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPendingRequests", reflect.TypeOf((*MockUseCase)(nil).ListPendingRequests), ctx, profileID)
+}
+
+// HasPendingRequest mocks base method
+func (m *MockUseCase) HasPendingRequest(ctx context.Context, profileFromID, profileToID uint64) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HasPendingRequest", ctx, profileFromID, profileToID)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// HasPendingRequest indicates an expected call of HasPendingRequest
+func (mr *MockUseCaseMockRecorder) HasPendingRequest(ctx, profileFromID, profileToID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasPendingRequest", reflect.TypeOf((*MockUseCase)(nil).HasPendingRequest), ctx, profileFromID, profileToID)
 }
 
 // CreateRequest mocks base method

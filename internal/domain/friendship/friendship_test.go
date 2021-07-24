@@ -220,3 +220,54 @@ func TestStopFriendship(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, friends)
 }
+
+func TestHasPendingRequests(t *testing.T) {
+	if os.Getenv("SKIP_DB_TEST") == "1" {
+		t.SkipNow()
+	}
+	err := godotenv.Load("../../../.env")
+	require.NoError(t, err)
+
+	profileRepo, err := profilesRepository.NewDefault()
+	require.NoError(t, err)
+
+	profilesUC := profilesUseCase.New(profileRepo)
+
+	usersRepo, err := usersRepository.NewDefault()
+	require.NoError(t, err)
+
+	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
+
+	repo, err := repository.NewDefault()
+	require.NoError(t, err)
+
+	uc := usecase.New(repo, profilesUC)
+
+	ctx := context.Background()
+
+	johnUserID, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe_friendship", "topsecret", "John", "Doe", 18, "", "male", "")
+	require.NoError(t, err)
+	defer usersUC.DeleteUser(ctx, johnUserID) //nolint:errcheck
+
+	topsyUserID, topsyProfileID, err := usersUC.CreateUser(ctx, "topsycret", "topsecret", "Topsy", "Cret", 18, "", "male", "")
+	require.NoError(t, err)
+	defer usersUC.DeleteUser(ctx, topsyUserID) //nolint:errcheck
+
+	hasRequest, err := uc.HasPendingRequest(ctx, johnProfileID, topsyProfileID)
+	require.NoError(t, err)
+	require.False(t, hasRequest)
+
+	err = uc.CreateRequest(ctx, johnProfileID, topsyProfileID)
+	require.NoError(t, err)
+
+	hasRequest, err = uc.HasPendingRequest(ctx, johnProfileID, topsyProfileID)
+	require.NoError(t, err)
+	require.True(t, hasRequest)
+
+	err = uc.AcceptRequest(ctx, johnProfileID, topsyProfileID)
+	require.NoError(t, err)
+
+	hasRequest, err = uc.HasPendingRequest(ctx, johnProfileID, topsyProfileID)
+	require.NoError(t, err)
+	require.False(t, hasRequest)
+}
