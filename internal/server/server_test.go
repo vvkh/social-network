@@ -582,3 +582,68 @@ func TestFriendshipRequestPage(t *testing.T) {
 		})
 	}
 }
+
+func TestAcceptDeclineFriendshipRequest(t *testing.T) {
+	tests := []struct {
+		name          string
+		self          profilesEntity.Profile
+		url           string
+		expectAccept  bool
+		expectDecline bool
+		profileID     uint64
+	}{
+		{
+			name: "accept_request",
+			self: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			profileID:    3,
+			expectAccept: true,
+			url:          "/friends/requests/3/accept/",
+		},
+		{
+			name: "decline_request",
+			self: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			profileID:     3,
+			expectDecline: true,
+			url:           "/friends/requests/3/decline/",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			usersUseCase := mocks.NewMockUseCase(ctrl)
+			usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(entity.AccessToken{UserID: test.self.UserID, ProfileID: test.self.ID}, nil)
+			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
+			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.self.UserID).Return([]profilesEntity.Profile{test.self}, nil).AnyTimes()
+			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			if test.expectAccept {
+				friendshipUseCase.EXPECT().AcceptRequest(gomock.Any(), test.profileID, test.self.ID).Return(nil)
+			}
+			if test.expectDecline {
+				friendshipUseCase.EXPECT().DeclineRequest(gomock.Any(), test.profileID, test.self.ID).Return(nil)
+			}
+
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
+
+			request := httptest.NewRequest("POST", test.url, nil)
+			request.AddCookie(&http.Cookie{
+				Name:     "token",
+				Value:    "secret",
+				Path:     "/",
+				HttpOnly: true,
+			})
+			responseWriter := httptest.NewRecorder()
+			s.Handle(responseWriter, request)
+
+			response := responseWriter.Result()
+			require.Equal(t, http.StatusFound, response.StatusCode)
+			require.Equal(t, "/friends/requests/", response.Header.Get("Location"))
+		})
+	}
+}
