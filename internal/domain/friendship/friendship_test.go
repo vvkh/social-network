@@ -161,6 +161,13 @@ func TestDeclineFriendshipRequest(t *testing.T) {
 	requests, err = uc.ListPendingRequests(ctx, topsy.ID)
 	require.NoError(t, err)
 	require.Empty(t, requests)
+
+	err = uc.AcceptRequest(ctx, john.ID, topsy.ID)
+	require.NoError(t, err)
+
+	johnFriends, err = uc.ListFriends(ctx, john.ID)
+	require.NoError(t, err)
+	require.Contains(t, johnFriends, topsy)
 }
 
 func TestStopFriendship(t *testing.T) {
@@ -219,4 +226,56 @@ func TestStopFriendship(t *testing.T) {
 	friends, err = uc.ListFriends(ctx, john.ID)
 	require.NoError(t, err)
 	require.Empty(t, friends)
+}
+
+func TestGetFriendshipStatus(t *testing.T) {
+	if os.Getenv("SKIP_DB_TEST") == "1" {
+		t.SkipNow()
+	}
+	err := godotenv.Load("../../../.env")
+	require.NoError(t, err)
+
+	profileRepo, err := profilesRepository.NewDefault()
+	require.NoError(t, err)
+
+	profilesUC := profilesUseCase.New(profileRepo)
+
+	usersRepo, err := usersRepository.NewDefault()
+	require.NoError(t, err)
+
+	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
+
+	repo, err := repository.NewDefault()
+	require.NoError(t, err)
+
+	uc := usecase.New(repo, profilesUC)
+
+	ctx := context.Background()
+
+	johnUserID, johnProfileID, err := usersUC.CreateUser(ctx, "johndoe_friendship", "topsecret", "John", "Doe", 18, "", "male", "")
+	require.NoError(t, err)
+	defer usersUC.DeleteUser(ctx, johnUserID) //nolint:errcheck
+
+	topsyUserID, topsyProfileID, err := usersUC.CreateUser(ctx, "topsycret", "topsecret", "Topsy", "Cret", 18, "", "male", "")
+	require.NoError(t, err)
+	defer usersUC.DeleteUser(ctx, topsyUserID) //nolint:errcheck
+
+	status, err := uc.GetFriendshipStatus(ctx, johnProfileID, topsyProfileID)
+	require.NoError(t, err)
+	require.True(t, status.IsNone())
+
+	err = uc.CreateRequest(ctx, johnProfileID, topsyProfileID)
+	require.NoError(t, err)
+
+	status, err = uc.GetFriendshipStatus(ctx, johnProfileID, topsyProfileID)
+	require.NoError(t, err)
+	require.True(t, status.IsPending())
+	require.True(t, status.IsWaitingApprovalFrom(topsyProfileID))
+
+	err = uc.AcceptRequest(ctx, johnProfileID, topsyProfileID)
+	require.NoError(t, err)
+
+	status, err = uc.GetFriendshipStatus(ctx, johnProfileID, topsyProfileID)
+	require.NoError(t, err)
+	require.True(t, status.IsAccepted())
 }

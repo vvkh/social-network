@@ -13,7 +13,7 @@ import (
 	"github.com/vvkh/social-network/internal/templates"
 )
 
-func Handle(profiles profiles.UseCase, templates *templates.Templates) http.HandlerFunc {
+func Handle(profiles profiles.UseCase, friendship friendship.UseCase, templates *templates.Templates) http.HandlerFunc {
 	render := templates.Add("profile.gohtml").Parse()
 
 	return func(writer http.ResponseWriter, request *http.Request) {
@@ -27,15 +27,30 @@ func Handle(profiles profiles.UseCase, templates *templates.Templates) http.Hand
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
 		profileDto := dtoFromModel(profile[0])
 
 		self, _ := middlewares.ProfileFromCtx(request.Context())
+		friendshipStatus, err := friendship.GetFriendshipStatus(request.Context(), uint64(profileID), self.ID)
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		selfProfileDto := dtoFromModel(self)
 		err = render(writer, Context{
-			Self:    selfProfileDto,
-			Profile: profileDto,
+			Self:                            selfProfileDto,
+			Profile:                         profileDto,
+			AreFriends:                      friendshipStatus.IsAccepted(),
+			IsWaitingFriendshipApproval:     friendshipStatus.IsWaitingApprovalFrom(self.ID),
+			HasNotConfirmedFriendship:       friendshipStatus.IsWaitingApprovalFrom(uint64(profileID)),
+			FriendshipRequestDeclined:       friendshipStatus.IsDeclinedBy(uint64(profileID)),
+			FriendshipRequestDeclinedBySelf: friendshipStatus.IsDeclinedBy(self.ID),
 		})
-		fmt.Println(err)
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 

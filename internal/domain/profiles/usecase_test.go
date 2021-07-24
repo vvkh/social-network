@@ -37,7 +37,7 @@ func TestProfiles(t *testing.T) {
 	require.NoError(t, err)
 	defer uc.DeleteUser(ctx, johnID) //nolint:errcheck
 
-	topsyID, topsyProfileID, err := uc.CreateUser(ctx, "topsycret", "123", "topsy", "cret", 19, "USA", "male", "")
+	topsyID, topsyProfileID, err := uc.CreateUser(ctx, "topsycret_profiles", "123", "topsy", "cret", 19, "USA", "male", "")
 	require.NoError(t, err)
 	defer uc.DeleteUser(ctx, topsyID) //nolint:errcheck
 

@@ -3,8 +3,13 @@ package profile
 import "github.com/vvkh/social-network/internal/domain/profiles/entity"
 
 type Context struct {
-	Self    ProfileDto
-	Profile ProfileDto
+	Self                            ProfileDto
+	Profile                         ProfileDto
+	AreFriends                      bool
+	IsWaitingFriendshipApproval     bool
+	HasNotConfirmedFriendship       bool
+	FriendshipRequestDeclined       bool
+	FriendshipRequestDeclinedBySelf bool
 }
 
 type ProfileDto struct {

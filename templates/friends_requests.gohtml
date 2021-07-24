@@ -1,0 +1,14 @@
+{{ define "title"}}Friendship requests{{end}}
+
+{{ define "content" }}
+    <h1>Friendship requests</h1>
+    <ul>
+        {{ range .PendingRequests }}
+            <li>
+                <a href="{{ printf "/profiles/%d/" .ID }}">{{ .FirstName }} {{ .LastName }}</a>
+                <form method="POST" action="{{printf "/friends/requests/%d/accept/" .ID }}"><input type="submit" value="Accept"></form>
+                <form method="POST" action="{{printf "/friends/requests/%d/decline/" .ID }}"><input type="submit" value="Decline"></form>
+            </li>
+        {{ end }}
+    </ul>
+{{ end }}

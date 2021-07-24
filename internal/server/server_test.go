@@ -11,6 +11,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
+	friendshipEntity "github.com/vvkh/social-network/internal/domain/friendship/entity"
 	friendshipMock "github.com/vvkh/social-network/internal/domain/friendship/mocks"
 	profilesEntity "github.com/vvkh/social-network/internal/domain/profiles/entity"
 	profilesMock "github.com/vvkh/social-network/internal/domain/profiles/mocks"
@@ -136,12 +137,6 @@ func TestRoutesSmokeWithAuthentication(t *testing.T) {
 			wantStatus:    http.StatusOK,
 			wantToContain: "<h1>John Snow</h1>",
 		},
-		{
-			method:        "GET",
-			route:         "/friends/",
-			wantStatus:    http.StatusOK,
-			wantToContain: "<title>Friends</title>",
-		},
 	}
 	for _, test := range tests {
 		t.Run(test.route, func(t *testing.T) {
@@ -160,6 +155,7 @@ func TestRoutesSmokeWithAuthentication(t *testing.T) {
 			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.userID).Return([]profilesEntity.Profile{sampleProfile}, nil).AnyTimes()
 			profilesUseCase.EXPECT().ListProfiles(gomock.Any()).Return([]profilesEntity.Profile{sampleProfile}, nil).AnyTimes()
 			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			friendshipUseCase.EXPECT().GetFriendshipStatus(gomock.Any(), gomock.Any(), gomock.Any()).Return(friendshipEntity.FriendshipStatus{State: friendshipEntity.StateNone}, nil).AnyTimes()
 			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
 
 			request := httptest.NewRequest(test.method, test.route, nil)
@@ -310,12 +306,13 @@ func TestRoutesSmokeWithInvalidAuthenticationToken(t *testing.T) {
 
 func TestProfilePage(t *testing.T) {
 	tests := []struct {
-		name       string
-		profile    profilesEntity.Profile
-		self       profilesEntity.Profile
-		url        string
-		wantStatus int
-		wantBody   string
+		name             string
+		profile          profilesEntity.Profile
+		self             profilesEntity.Profile
+		url              string
+		friendshipStatus friendshipEntity.FriendshipStatus
+		wantStatus       int
+		wantBody         []string
 	}{
 		{
 			name: "profile_page_contains_friendship_request",
@@ -327,9 +324,119 @@ func TestProfilePage(t *testing.T) {
 				ID:     3,
 				UserID: 4,
 			},
-			url:        "/profiles/1/",
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				State: friendshipEntity.StateNone,
+			},
 			wantStatus: http.StatusOK,
-			wantBody:   `<input type="submit" value="request friendship">`,
+			wantBody:   []string{`<input type="submit" value="request friendship">`},
+		},
+		{
+			name: "has_accept_decline_request_buttons_for_pending_request",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				RequestedToProfileID:   3,
+				RequestedFromProfileID: 1,
+				State:                  friendshipEntity.StatePending,
+			},
+			wantStatus: http.StatusOK,
+			wantBody: []string{
+				`<form method="POST" action="/friends/requests/1/accept/"><input type="submit" value="Accept"></form>`,
+				`<form method="POST" action="/friends/requests/1/decline/"><input type="submit" value="Decline"></form>`,
+			},
+		},
+		{
+			name: "waiting_for_friendship_confirmation_button",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				RequestedToProfileID:   1,
+				RequestedFromProfileID: 3,
+				State:                  friendshipEntity.StatePending,
+			},
+			wantStatus: http.StatusOK,
+			wantBody: []string{
+				`You've already sent friendship request`,
+			},
+		},
+		{
+			name: "already_friends",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				RequestedToProfileID:   1,
+				RequestedFromProfileID: 3,
+				State:                  friendshipEntity.StateAccepted,
+			},
+			wantStatus: http.StatusOK,
+			wantBody: []string{
+				`You are friends`,
+			},
+		},
+		{
+			name: "request_declined",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				RequestedToProfileID:   1,
+				RequestedFromProfileID: 3,
+				State:                  friendshipEntity.StatesDeclined,
+			},
+			wantStatus: http.StatusOK,
+			wantBody: []string{
+				`Your friendship request was declined`,
+			},
+		},
+		{
+			name: "request_declined_by_self",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				RequestedToProfileID:   3,
+				RequestedFromProfileID: 1,
+				State:                  friendshipEntity.StatesDeclined,
+			},
+			wantStatus: http.StatusOK,
+			wantBody: []string{
+				`You have declined friendship request`,
+				`<form method="POST" action="/friends/requests/1/accept/"><input type="submit" value="Accept"></form>`,
+			},
 		},
 	}
 
@@ -342,7 +449,7 @@ func TestProfilePage(t *testing.T) {
 			profilesUseCase.EXPECT().GetByID(gomock.Any(), test.profile.ID).Return([]profilesEntity.Profile{test.profile}, nil).AnyTimes()
 			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.self.UserID).Return([]profilesEntity.Profile{test.self}, nil).AnyTimes()
 			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
-
+			friendshipUseCase.EXPECT().GetFriendshipStatus(gomock.Any(), test.profile.ID, test.self.ID).Return(test.friendshipStatus, nil)
 			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
 
 			request := httptest.NewRequest("GET", test.url, nil)
@@ -361,7 +468,9 @@ func TestProfilePage(t *testing.T) {
 			body, err := io.ReadAll(response.Body)
 			require.NoError(t, err)
 
-			require.Contains(t, string(body), test.wantBody)
+			for _, bodyPart := range test.wantBody {
+				require.Contains(t, string(body), bodyPart)
+			}
 		})
 	}
 }
@@ -414,6 +523,242 @@ func TestProfilePageFriendshipRequest(t *testing.T) {
 
 			response := responseWriter.Result()
 			require.Equal(t, test.wantStatus, response.StatusCode)
+		})
+	}
+}
+
+func TestFriendsPage(t *testing.T) {
+	tests := []struct {
+		name               string
+		self               profilesEntity.Profile
+		friendshipRequests []profilesEntity.Profile
+		friends            []profilesEntity.Profile
+		wantBody           []string
+	}{
+		{
+			name: "friends_are_shown_on_page",
+			self: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			friends: []profilesEntity.Profile{
+				{
+					ID:        3,
+					UserID:    4,
+					FirstName: "John",
+					LastName:  "Doe",
+				},
+				{
+					ID:        5,
+					UserID:    6,
+					FirstName: "Topsy",
+					LastName:  "Cret",
+				},
+			},
+			wantBody: []string{
+				"<h1>Friends</h1>",
+				`<a href="/profiles/3/">John Doe</a>`,
+				`<a href="/profiles/5/">Topsy Cret</a>`,
+			},
+		},
+		{
+			name: "pending_requests_count_shown_on_page",
+			self: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			friendshipRequests: []profilesEntity.Profile{
+				{
+					ID:        3,
+					UserID:    4,
+					FirstName: "John",
+					LastName:  "Doe",
+				},
+				{
+					ID:        5,
+					UserID:    6,
+					FirstName: "Topsy",
+					LastName:  "Cret",
+				},
+			},
+			wantBody: []string{
+				"<h1>Friends</h1>",
+				`<a href="/friends/requests/">Pending friendship requests (2)</a>`,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			usersUseCase := mocks.NewMockUseCase(ctrl)
+			usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(entity.AccessToken{UserID: test.self.UserID, ProfileID: test.self.ID}, nil)
+			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
+			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.self.UserID).Return([]profilesEntity.Profile{test.self}, nil).AnyTimes()
+			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			friendshipUseCase.EXPECT().ListFriends(gomock.Any(), test.self.ID).Return(test.friends, nil)
+			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), test.self.ID).Return(test.friendshipRequests, nil)
+
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
+
+			request := httptest.NewRequest("GET", "/friends/", nil)
+			request.AddCookie(&http.Cookie{
+				Name:     "token",
+				Value:    "secret",
+				Path:     "/",
+				HttpOnly: true,
+			})
+			responseWriter := httptest.NewRecorder()
+			s.Handle(responseWriter, request)
+
+			response := responseWriter.Result()
+			require.Equal(t, http.StatusOK, response.StatusCode)
+
+			body, err := io.ReadAll(response.Body)
+			require.NoError(t, err)
+
+			for _, wantPart := range test.wantBody {
+				require.Contains(t, string(body), wantPart)
+			}
+		})
+	}
+}
+
+func TestFriendshipRequestPage(t *testing.T) {
+	tests := []struct {
+		name               string
+		self               profilesEntity.Profile
+		friendshipRequests []profilesEntity.Profile
+		wantBody           []string
+	}{
+		{
+			name: "friendship_requests_are_shown_on_page",
+			self: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			friendshipRequests: []profilesEntity.Profile{
+				{
+					ID:        3,
+					UserID:    4,
+					FirstName: "John",
+					LastName:  "Doe",
+				},
+				{
+					ID:        5,
+					UserID:    6,
+					FirstName: "Topsy",
+					LastName:  "Cret",
+				},
+			},
+			wantBody: []string{
+				"<h1>Friendship requests</h1>",
+				`<a href="/profiles/3/">John Doe</a>`,
+				`<form method="POST" action="/friends/requests/3/accept/"><input type="submit" value="Accept"></form>`,
+				`<form method="POST" action="/friends/requests/3/decline/"><input type="submit" value="Decline"></form>`,
+				`<a href="/profiles/5/">Topsy Cret</a>`,
+				`<form method="POST" action="/friends/requests/5/accept/"><input type="submit" value="Accept"></form>`,
+				`<form method="POST" action="/friends/requests/5/decline/"><input type="submit" value="Decline"></form>`,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			usersUseCase := mocks.NewMockUseCase(ctrl)
+			usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(entity.AccessToken{UserID: test.self.UserID, ProfileID: test.self.ID}, nil)
+			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
+			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.self.UserID).Return([]profilesEntity.Profile{test.self}, nil).AnyTimes()
+			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), test.self.ID).Return(test.friendshipRequests, nil)
+
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
+
+			request := httptest.NewRequest("GET", "/friends/requests/", nil)
+			request.AddCookie(&http.Cookie{
+				Name:     "token",
+				Value:    "secret",
+				Path:     "/",
+				HttpOnly: true,
+			})
+			responseWriter := httptest.NewRecorder()
+			s.Handle(responseWriter, request)
+
+			response := responseWriter.Result()
+			require.Equal(t, http.StatusOK, response.StatusCode)
+
+			body, err := io.ReadAll(response.Body)
+			require.NoError(t, err)
+
+			for _, wantPart := range test.wantBody {
+				require.Contains(t, string(body), wantPart)
+			}
+		})
+	}
+}
+
+func TestAcceptDeclineFriendshipRequest(t *testing.T) {
+	tests := []struct {
+		name          string
+		self          profilesEntity.Profile
+		url           string
+		expectAccept  bool
+		expectDecline bool
+		profileID     uint64
+	}{
+		{
+			name: "accept_request",
+			self: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			profileID:    3,
+			expectAccept: true,
+			url:          "/friends/requests/3/accept/",
+		},
+		{
+			name: "decline_request",
+			self: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			profileID:     3,
+			expectDecline: true,
+			url:           "/friends/requests/3/decline/",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			usersUseCase := mocks.NewMockUseCase(ctrl)
+			usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(entity.AccessToken{UserID: test.self.UserID, ProfileID: test.self.ID}, nil)
+			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
+			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.self.UserID).Return([]profilesEntity.Profile{test.self}, nil).AnyTimes()
+			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			if test.expectAccept {
+				friendshipUseCase.EXPECT().AcceptRequest(gomock.Any(), test.profileID, test.self.ID).Return(nil)
+			}
+			if test.expectDecline {
+				friendshipUseCase.EXPECT().DeclineRequest(gomock.Any(), test.profileID, test.self.ID).Return(nil)
+			}
+
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
+
+			request := httptest.NewRequest("POST", test.url, nil)
+			request.AddCookie(&http.Cookie{
+				Name:     "token",
+				Value:    "secret",
+				Path:     "/",
+				HttpOnly: true,
+			})
+			responseWriter := httptest.NewRecorder()
+			s.Handle(responseWriter, request)
+
+			response := responseWriter.Result()
+			require.Equal(t, http.StatusFound, response.StatusCode)
+			require.Equal(t, "/friends/requests/", response.Header.Get("Location"))
 		})
 	}
 }
