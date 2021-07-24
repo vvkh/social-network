@@ -1,5 +1,12 @@
 {{ define "title"}}Friends{{end}}
 
 {{ define "content" }}
-Friends page
+    <h1>Friends</h1>
+    <ul>
+        {{ range .Friends }}
+            <li>
+                <a href="{{ printf "/profiles/%d/" .ID }}">{{ .FirstName }} {{ .LastName }}</a>
+            </li>
+        {{ end }}
+    </ul>
 {{ end }}

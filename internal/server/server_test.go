@@ -136,12 +136,6 @@ func TestRoutesSmokeWithAuthentication(t *testing.T) {
 			wantStatus:    http.StatusOK,
 			wantToContain: "<h1>John Snow</h1>",
 		},
-		{
-			method:        "GET",
-			route:         "/friends/",
-			wantStatus:    http.StatusOK,
-			wantToContain: "<title>Friends</title>",
-		},
 	}
 	for _, test := range tests {
 		t.Run(test.route, func(t *testing.T) {
@@ -414,6 +408,76 @@ func TestProfilePageFriendshipRequest(t *testing.T) {
 
 			response := responseWriter.Result()
 			require.Equal(t, test.wantStatus, response.StatusCode)
+		})
+	}
+}
+
+func TestFriendsPage(t *testing.T) {
+	tests := []struct {
+		name     string
+		self     profilesEntity.Profile
+		friends  []profilesEntity.Profile
+		wantBody []string
+	}{
+		{
+			name: "friends_are_shown_on_page",
+			self: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			friends: []profilesEntity.Profile{
+				{
+					ID:        3,
+					UserID:    4,
+					FirstName: "John",
+					LastName:  "Doe",
+				},
+				{
+					ID:        5,
+					UserID:    6,
+					FirstName: "Topsy",
+					LastName:  "Cret",
+				},
+			},
+			wantBody: []string{
+				"<h1>Friends</h1>",
+				`<a href="/profiles/3/">John Doe</a>`,
+				`<a href="/profiles/5/">Topsy Cret</a>`,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			usersUseCase := mocks.NewMockUseCase(ctrl)
+			usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(entity.AccessToken{UserID: test.self.UserID, ProfileID: test.self.ID}, nil)
+			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
+			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.self.UserID).Return([]profilesEntity.Profile{test.self}, nil).AnyTimes()
+			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			friendshipUseCase.EXPECT().ListFriends(gomock.Any(), test.self.ID).Return(test.friends, nil)
+
+			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
+
+			request := httptest.NewRequest("GET", "/friends/", nil)
+			request.AddCookie(&http.Cookie{
+				Name:     "token",
+				Value:    "secret",
+				Path:     "/",
+				HttpOnly: true,
+			})
+			responseWriter := httptest.NewRecorder()
+			s.Handle(responseWriter, request)
+
+			response := responseWriter.Result()
+			require.Equal(t, http.StatusOK, response.StatusCode)
+
+			body, err := io.ReadAll(response.Body)
+			require.NoError(t, err)
+
+			for _, wantPart := range test.wantBody {
+				require.Contains(t, string(body), wantPart)
+			}
 		})
 	}
 }
