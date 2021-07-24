@@ -3,8 +3,9 @@ package friends
 import "github.com/vvkh/social-network/internal/domain/profiles/entity"
 
 type Contex struct {
-	Self    ProfileDto
-	Friends []ProfileDto
+	Self                 ProfileDto
+	Friends              []ProfileDto
+	PendingRequestsCount int
 }
 
 type ProfileDto struct {

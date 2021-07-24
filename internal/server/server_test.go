@@ -414,10 +414,11 @@ func TestProfilePageFriendshipRequest(t *testing.T) {
 
 func TestFriendsPage(t *testing.T) {
 	tests := []struct {
-		name     string
-		self     profilesEntity.Profile
-		friends  []profilesEntity.Profile
-		wantBody []string
+		name               string
+		self               profilesEntity.Profile
+		friendshipRequests []profilesEntity.Profile
+		friends            []profilesEntity.Profile
+		wantBody           []string
 	}{
 		{
 			name: "friends_are_shown_on_page",
@@ -445,6 +446,31 @@ func TestFriendsPage(t *testing.T) {
 				`<a href="/profiles/5/">Topsy Cret</a>`,
 			},
 		},
+		{
+			name: "pending_requests_count_shown_on_page",
+			self: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			friendshipRequests: []profilesEntity.Profile{
+				{
+					ID:        3,
+					UserID:    4,
+					FirstName: "John",
+					LastName:  "Doe",
+				},
+				{
+					ID:        5,
+					UserID:    6,
+					FirstName: "Topsy",
+					LastName:  "Cret",
+				},
+			},
+			wantBody: []string{
+				"<h1>Friends</h1>",
+				`<a href="/friends/requests/">Pending friendship requests (2)</a>`,
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -456,6 +482,7 @@ func TestFriendsPage(t *testing.T) {
 			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.self.UserID).Return([]profilesEntity.Profile{test.self}, nil).AnyTimes()
 			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
 			friendshipUseCase.EXPECT().ListFriends(gomock.Any(), test.self.ID).Return(test.friends, nil)
+			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), test.self.ID).Return(test.friendshipRequests, nil)
 
 			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
 

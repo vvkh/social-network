@@ -2,6 +2,7 @@
 
 {{ define "content" }}
     <h1>Friends</h1>
+    <a href="/friends/requests/">Pending friendship requests ({{ .PendingRequestsCount }})</a>
     <ul>
         {{ range .Friends }}
             <li>

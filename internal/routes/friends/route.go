@@ -18,10 +18,16 @@ func Handle(friendshipUseCase friendship.UseCase, templates *templates.Templates
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		pendingFriendshipRequests, err := friendshipUseCase.ListPendingRequests(request.Context(), self.ID)
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
 		tempalateCtx := Contex{
-			Self:    dtoFromModel(self),
-			Friends: dtoFromModels(friends),
+			Self:                 dtoFromModel(self),
+			Friends:              dtoFromModels(friends),
+			PendingRequestsCount: len(pendingFriendshipRequests),
 		}
 		err = render(writer, tempalateCtx)
 		if err != nil {
