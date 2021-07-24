@@ -161,6 +161,13 @@ func TestDeclineFriendshipRequest(t *testing.T) {
 	requests, err = uc.ListPendingRequests(ctx, topsy.ID)
 	require.NoError(t, err)
 	require.Empty(t, requests)
+
+	err = uc.AcceptRequest(ctx, john.ID, topsy.ID)
+	require.NoError(t, err)
+
+	johnFriends, err = uc.ListFriends(ctx, john.ID)
+	require.NoError(t, err)
+	require.Contains(t, johnFriends, topsy)
 }
 
 func TestStopFriendship(t *testing.T) {
@@ -221,7 +228,7 @@ func TestStopFriendship(t *testing.T) {
 	require.Empty(t, friends)
 }
 
-func TestHasPendingRequests(t *testing.T) {
+func TestGetFriendshipStatus(t *testing.T) {
 	if os.Getenv("SKIP_DB_TEST") == "1" {
 		t.SkipNow()
 	}
@@ -253,21 +260,22 @@ func TestHasPendingRequests(t *testing.T) {
 	require.NoError(t, err)
 	defer usersUC.DeleteUser(ctx, topsyUserID) //nolint:errcheck
 
-	hasRequest, err := uc.HasPendingRequest(ctx, johnProfileID, topsyProfileID)
+	status, err := uc.GetFriendshipStatus(ctx, johnProfileID, topsyProfileID)
 	require.NoError(t, err)
-	require.False(t, hasRequest)
+	require.True(t, status.IsNone())
 
 	err = uc.CreateRequest(ctx, johnProfileID, topsyProfileID)
 	require.NoError(t, err)
 
-	hasRequest, err = uc.HasPendingRequest(ctx, johnProfileID, topsyProfileID)
+	status, err = uc.GetFriendshipStatus(ctx, johnProfileID, topsyProfileID)
 	require.NoError(t, err)
-	require.True(t, hasRequest)
+	require.True(t, status.IsPending())
+	require.True(t, status.IsWaitingApprovalFrom(topsyProfileID))
 
 	err = uc.AcceptRequest(ctx, johnProfileID, topsyProfileID)
 	require.NoError(t, err)
 
-	hasRequest, err = uc.HasPendingRequest(ctx, johnProfileID, topsyProfileID)
+	status, err = uc.GetFriendshipStatus(ctx, johnProfileID, topsyProfileID)
 	require.NoError(t, err)
-	require.False(t, hasRequest)
+	require.True(t, status.IsAccepted())
 }

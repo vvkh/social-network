@@ -7,7 +7,8 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	entity "github.com/vvkh/social-network/internal/domain/profiles/entity"
+	entity "github.com/vvkh/social-network/internal/domain/friendship/entity"
+	entity0 "github.com/vvkh/social-network/internal/domain/profiles/entity"
 	reflect "reflect"
 )
 
@@ -35,10 +36,10 @@ func (m *MockUseCase) EXPECT() *MockUseCaseMockRecorder {
 }
 
 // ListFriends mocks base method
-func (m *MockUseCase) ListFriends(ctx context.Context, profileID uint64) ([]entity.Profile, error) {
+func (m *MockUseCase) ListFriends(ctx context.Context, profileID uint64) ([]entity0.Profile, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListFriends", ctx, profileID)
-	ret0, _ := ret[0].([]entity.Profile)
+	ret0, _ := ret[0].([]entity0.Profile)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -50,10 +51,10 @@ func (mr *MockUseCaseMockRecorder) ListFriends(ctx, profileID interface{}) *gomo
 }
 
 // ListPendingRequests mocks base method
-func (m *MockUseCase) ListPendingRequests(ctx context.Context, profileID uint64) ([]entity.Profile, error) {
+func (m *MockUseCase) ListPendingRequests(ctx context.Context, profileID uint64) ([]entity0.Profile, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListPendingRequests", ctx, profileID)
-	ret0, _ := ret[0].([]entity.Profile)
+	ret0, _ := ret[0].([]entity0.Profile)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -64,19 +65,19 @@ func (mr *MockUseCaseMockRecorder) ListPendingRequests(ctx, profileID interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPendingRequests", reflect.TypeOf((*MockUseCase)(nil).ListPendingRequests), ctx, profileID)
 }
 
-// HasPendingRequest mocks base method
-func (m *MockUseCase) HasPendingRequest(ctx context.Context, profileFromID, profileToID uint64) (bool, error) {
+// GetFriendshipStatus mocks base method
+func (m *MockUseCase) GetFriendshipStatus(ctx context.Context, one, other uint64) (entity.FriendshipStatus, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HasPendingRequest", ctx, profileFromID, profileToID)
-	ret0, _ := ret[0].(bool)
+	ret := m.ctrl.Call(m, "GetFriendshipStatus", ctx, one, other)
+	ret0, _ := ret[0].(entity.FriendshipStatus)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// HasPendingRequest indicates an expected call of HasPendingRequest
-func (mr *MockUseCaseMockRecorder) HasPendingRequest(ctx, profileFromID, profileToID interface{}) *gomock.Call {
+// GetFriendshipStatus indicates an expected call of GetFriendshipStatus
+func (mr *MockUseCaseMockRecorder) GetFriendshipStatus(ctx, one, other interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasPendingRequest", reflect.TypeOf((*MockUseCase)(nil).HasPendingRequest), ctx, profileFromID, profileToID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFriendshipStatus", reflect.TypeOf((*MockUseCase)(nil).GetFriendshipStatus), ctx, one, other)
 }
 
 // CreateRequest mocks base method

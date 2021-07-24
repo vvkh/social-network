@@ -11,6 +11,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
+	friendshipEntity "github.com/vvkh/social-network/internal/domain/friendship/entity"
 	friendshipMock "github.com/vvkh/social-network/internal/domain/friendship/mocks"
 	profilesEntity "github.com/vvkh/social-network/internal/domain/profiles/entity"
 	profilesMock "github.com/vvkh/social-network/internal/domain/profiles/mocks"
@@ -154,6 +155,7 @@ func TestRoutesSmokeWithAuthentication(t *testing.T) {
 			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.userID).Return([]profilesEntity.Profile{sampleProfile}, nil).AnyTimes()
 			profilesUseCase.EXPECT().ListProfiles(gomock.Any()).Return([]profilesEntity.Profile{sampleProfile}, nil).AnyTimes()
 			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			friendshipUseCase.EXPECT().GetFriendshipStatus(gomock.Any(), gomock.Any(), gomock.Any()).Return(friendshipEntity.FriendshipStatus{State: friendshipEntity.StateNone}, nil).AnyTimes()
 			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
 
 			request := httptest.NewRequest(test.method, test.route, nil)
@@ -304,12 +306,13 @@ func TestRoutesSmokeWithInvalidAuthenticationToken(t *testing.T) {
 
 func TestProfilePage(t *testing.T) {
 	tests := []struct {
-		name       string
-		profile    profilesEntity.Profile
-		self       profilesEntity.Profile
-		url        string
-		wantStatus int
-		wantBody   string
+		name             string
+		profile          profilesEntity.Profile
+		self             profilesEntity.Profile
+		url              string
+		friendshipStatus friendshipEntity.FriendshipStatus
+		wantStatus       int
+		wantBody         []string
 	}{
 		{
 			name: "profile_page_contains_friendship_request",
@@ -321,9 +324,119 @@ func TestProfilePage(t *testing.T) {
 				ID:     3,
 				UserID: 4,
 			},
-			url:        "/profiles/1/",
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				State: friendshipEntity.StateNone,
+			},
 			wantStatus: http.StatusOK,
-			wantBody:   `<input type="submit" value="request friendship">`,
+			wantBody:   []string{`<input type="submit" value="request friendship">`},
+		},
+		{
+			name: "has_accept_decline_request_buttons_for_pending_request",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				RequestedToProfileID:   3,
+				RequestedFromProfileID: 1,
+				State:                  friendshipEntity.StatePending,
+			},
+			wantStatus: http.StatusOK,
+			wantBody: []string{
+				`<form method="POST" action="/friends/requests/1/accept/"><input type="submit" value="Accept"></form>`,
+				`<form method="POST" action="/friends/requests/1/decline/"><input type="submit" value="Decline"></form>`,
+			},
+		},
+		{
+			name: "waiting_for_friendship_confirmation_button",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				RequestedToProfileID:   1,
+				RequestedFromProfileID: 3,
+				State:                  friendshipEntity.StatePending,
+			},
+			wantStatus: http.StatusOK,
+			wantBody: []string{
+				`You've already sent friendship request`,
+			},
+		},
+		{
+			name: "already_friends",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				RequestedToProfileID:   1,
+				RequestedFromProfileID: 3,
+				State:                  friendshipEntity.StateAccepted,
+			},
+			wantStatus: http.StatusOK,
+			wantBody: []string{
+				`You are friends`,
+			},
+		},
+		{
+			name: "request_declined",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				RequestedToProfileID:   1,
+				RequestedFromProfileID: 3,
+				State:                  friendshipEntity.StatesDeclined,
+			},
+			wantStatus: http.StatusOK,
+			wantBody: []string{
+				`Your friendship request was declined`,
+			},
+		},
+		{
+			name: "request_declined_by_self",
+			profile: profilesEntity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			self: profilesEntity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url: "/profiles/1/",
+			friendshipStatus: friendshipEntity.FriendshipStatus{
+				RequestedToProfileID:   3,
+				RequestedFromProfileID: 1,
+				State:                  friendshipEntity.StatesDeclined,
+			},
+			wantStatus: http.StatusOK,
+			wantBody: []string{
+				`You have declined friendship request`,
+				`<form method="POST" action="/friends/requests/1/accept/"><input type="submit" value="Accept"></form>`,
+			},
 		},
 	}
 
@@ -336,7 +449,7 @@ func TestProfilePage(t *testing.T) {
 			profilesUseCase.EXPECT().GetByID(gomock.Any(), test.profile.ID).Return([]profilesEntity.Profile{test.profile}, nil).AnyTimes()
 			profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.self.UserID).Return([]profilesEntity.Profile{test.self}, nil).AnyTimes()
 			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
-
+			friendshipUseCase.EXPECT().GetFriendshipStatus(gomock.Any(), test.profile.ID, test.self.ID).Return(test.friendshipStatus, nil)
 			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
 
 			request := httptest.NewRequest("GET", test.url, nil)
@@ -355,7 +468,9 @@ func TestProfilePage(t *testing.T) {
 			body, err := io.ReadAll(response.Body)
 			require.NoError(t, err)
 
-			require.Contains(t, string(body), test.wantBody)
+			for _, bodyPart := range test.wantBody {
+				require.Contains(t, string(body), bodyPart)
+			}
 		})
 	}
 }

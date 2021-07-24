@@ -6,9 +6,9 @@ package mocks
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
+	entity "github.com/vvkh/social-network/internal/domain/friendship/entity"
+	reflect "reflect"
 )
 
 // MockRepository is a mock of Repository interface
@@ -62,6 +62,21 @@ func (m *MockRepository) ListPendingRequests(ctx context.Context, profileID uint
 func (mr *MockRepositoryMockRecorder) ListPendingRequests(ctx, profileID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPendingRequests", reflect.TypeOf((*MockRepository)(nil).ListPendingRequests), ctx, profileID)
+}
+
+// GetFriendshipStatus mocks base method
+func (m *MockRepository) GetFriendshipStatus(ctx context.Context, one, other uint64) (entity.FriendshipStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFriendshipStatus", ctx, one, other)
+	ret0, _ := ret[0].(entity.FriendshipStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFriendshipStatus indicates an expected call of GetFriendshipStatus
+func (mr *MockRepositoryMockRecorder) GetFriendshipStatus(ctx, one, other interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFriendshipStatus", reflect.TypeOf((*MockRepository)(nil).GetFriendshipStatus), ctx, one, other)
 }
 
 // CreateRequest mocks base method
