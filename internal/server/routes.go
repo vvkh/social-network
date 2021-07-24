@@ -12,6 +12,7 @@ import (
 	"github.com/vvkh/social-network/internal/middlewares"
 	"github.com/vvkh/social-network/internal/permissions"
 	"github.com/vvkh/social-network/internal/routes/friends"
+	"github.com/vvkh/social-network/internal/routes/friends_requests"
 	"github.com/vvkh/social-network/internal/routes/index"
 	"github.com/vvkh/social-network/internal/routes/login"
 	"github.com/vvkh/social-network/internal/routes/logout"
@@ -47,7 +48,10 @@ func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase, pr
 		r.Get("/", register.HandleGet(templates))
 		r.Post("/", register.HandlePost(usersUseCase, "/login/"))
 	})
-	s.handler.Get("/friends/", authRequired(friends.Handle(friendshipUseCase, templates)))
+	s.handler.Route("/friends/", func(r chi.Router) {
+		r.Get("/", authRequired(friends.Handle(friendshipUseCase, templates)))
+		r.Get("/requests/", authRequired(friends_requests.Handle(friendshipUseCase, templates)))
+	})
 	s.handler.Route("/profiles/", func(r chi.Router) {
 		r.Get("/", authRequired(profiles.Handle(profilesUseCase, templates)))
 		r.Get("/{profileID:[0-9]+}/", authRequired(profile.Handle(profilesUseCase, templates)))
