@@ -108,7 +108,7 @@ func TestProfilePage(t *testing.T) {
 			wantStatus: http.StatusOK,
 			wantBody: []string{
 				`You are friends`,
-				//`<form method="POST" action="/profiles/1/friendship/stop"><input type="submit" value="Stop friendship"></form>`,
+				`<form method="POST" action="/friends/1/stop"><input type="submit" value="stop friendship"></form>`,
 			},
 		},
 		{

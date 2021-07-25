@@ -17,6 +17,7 @@
             You've already sent friendship request
         {{ else if .AreFriends }}
             You are friends
+            <form method="POST" action="{{ printf "/friends/%d/stop" .Profile.ID }}"><input type="submit" value="stop friendship"></form>
         {{ else if .FriendshipRequestDeclined }}
             Your friendship request was declined
         {{ else if .FriendshipRequestDeclinedBySelf }}
