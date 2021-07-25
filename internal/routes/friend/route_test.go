@@ -1,4 +1,4 @@
-package profile_test
+package friend_test
 
 import (
 	"net/http"
@@ -8,51 +8,48 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	friendshipMocks "github.com/vvkh/social-network/internal/domain/friendship/mocks"
+	"github.com/vvkh/social-network/internal/domain/friendship/mocks"
 	"github.com/vvkh/social-network/internal/domain/profiles/entity"
 	"github.com/vvkh/social-network/internal/middlewares"
 	"github.com/vvkh/social-network/internal/server"
 )
 
-func TestProfilePageFriendshipRequest(t *testing.T) {
+func TestStopFriendship(t *testing.T) {
 	tests := []struct {
-		name       string
-		profile    entity.Profile
-		self       entity.Profile
-		url        string
-		wantStatus int
+		name         string
+		self         entity.Profile
+		url          string
+		wantRedirect string
+		profileID    uint64
 	}{
 		{
-			name: "submit_friendship_form",
-			profile: entity.Profile{
+			name: "stop_friendship",
+			self: entity.Profile{
 				ID:     1,
 				UserID: 2,
 			},
-			self: entity.Profile{
-				ID:     3,
-				UserID: 4,
-			},
-			url:        "/profiles/1/friendship/",
-			wantStatus: http.StatusFound,
+			profileID:    3,
+			url:          "/friends/3/stop/",
+			wantRedirect: "/profiles/3/",
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			friendshipUseCase := friendshipMocks.NewMockUseCase(ctrl)
-			friendshipUseCase.EXPECT().CreateRequest(gomock.Any(), test.self.ID, test.profile.ID).Return(nil)
+			friendshipUseCase := mocks.NewMockUseCase(ctrl)
+			friendshipUseCase.EXPECT().StopFriendship(gomock.Any(), test.self.ID, test.profileID).Return(nil)
 
 			s := server.New(":80", "../../../templates", nil, nil, friendshipUseCase)
-
 			request := httptest.NewRequest("POST", test.url, nil)
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))
-
 			responseWriter := httptest.NewRecorder()
+
 			s.Handle(responseWriter, request)
 
 			response := responseWriter.Result()
-			require.Equal(t, test.wantStatus, response.StatusCode)
+			require.Equal(t, http.StatusFound, response.StatusCode)
+			require.Equal(t, test.wantRedirect, response.Header.Get("Location"))
 		})
 	}
 }

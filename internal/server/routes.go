@@ -11,6 +11,7 @@ import (
 	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/middlewares"
 	"github.com/vvkh/social-network/internal/permissions"
+	"github.com/vvkh/social-network/internal/routes/friend"
 	"github.com/vvkh/social-network/internal/routes/friends"
 	"github.com/vvkh/social-network/internal/routes/friends_requests"
 	"github.com/vvkh/social-network/internal/routes/index"
@@ -50,16 +51,17 @@ func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase, pr
 	})
 	s.handler.Route("/friends/", func(r chi.Router) {
 		r.Get("/", authRequired(friends.Handle(friendshipUseCase, templates)))
+		r.Post("/{profile:[0-9]+}/stop/", friend.HandleStop(friendshipUseCase))
 		r.Route("/requests", func(r chi.Router) {
 			r.Get("/", authRequired(friends_requests.Handle(friendshipUseCase, templates)))
 			r.Post("/{profileFrom:[0-9]+}/accept/", authRequired(friends_requests.HandlePostAccept(friendshipUseCase, "/friends/requests/")))
 			r.Post("/{profileFrom:[0-9]+}/decline/", authRequired(friends_requests.HandlePostDecline(friendshipUseCase, "/friends/requests/")))
+			r.Post("/{profileTo:[0-9]+}/create/", authRequired(friends_requests.HandleCreate(friendshipUseCase)))
 		})
 
 	})
 	s.handler.Route("/profiles/", func(r chi.Router) {
 		r.Get("/", authRequired(profiles.Handle(profilesUseCase, templates)))
 		r.Get("/{profileID:[0-9]+}/", authRequired(profile.Handle(profilesUseCase, friendshipUseCase, templates)))
-		r.Post("/{profileID:[0-9]+}/friendship/", authRequired(profile.HandlePost(friendshipUseCase)))
 	})
 }

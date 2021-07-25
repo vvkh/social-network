@@ -1,6 +1,7 @@
 package friends_requests
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -65,5 +66,22 @@ func HandlePostDecline(friendshipUseCase friendship.UseCase, redirect string) ht
 			return
 		}
 		http.Redirect(writer, request, redirect, http.StatusFound)
+	}
+}
+
+func HandleCreate(friendshipUseCase friendship.UseCase) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		profileID, err := strconv.Atoi(chi.URLParam(request, "profileTo"))
+		if err != nil {
+			writer.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		self, _ := middlewares.ProfileFromCtx(request.Context())
+		err = friendshipUseCase.CreateRequest(request.Context(), self.ID, uint64(profileID))
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(writer, request, fmt.Sprintf("/profiles/%d/", profileID), http.StatusFound)
 	}
 }

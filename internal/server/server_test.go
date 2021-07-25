@@ -35,16 +35,16 @@ var (
 			url:    "/profiles/1/",
 		},
 		{
-			method: "POST",
-			url:    "/profiles/1/friendship/",
-		},
-		{
 			method: "GET",
 			url:    "/friends/",
 		},
 		{
 			method: "GET",
 			url:    "/friends/requests/",
+		},
+		{
+			method: "POST",
+			url:    "/friends/requests/1/create/",
 		},
 		{
 			method: "POST",
