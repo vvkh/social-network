@@ -42,7 +42,7 @@ func AuthenticateUser(usersUseCase users.UseCase, profilesUseCase profiles.UseCa
 
 			for _, profile := range profiles {
 				if profile.UserID == token.UserID && profile.ID == token.ProfileID {
-					ctx = context.WithValue(ctx, CtxKeyProfile, profile)
+					ctx = AddProfileToCtx(ctx, profile)
 					r = r.WithContext(ctx)
 					next.ServeHTTP(w, r)
 					return
@@ -58,4 +58,8 @@ func AuthenticateUser(usersUseCase users.UseCase, profilesUseCase profiles.UseCa
 func ProfileFromCtx(ctx context.Context) (profilesEntity.Profile, bool) {
 	profile, ok := ctx.Value(CtxKeyProfile).(profilesEntity.Profile)
 	return profile, ok
+}
+
+func AddProfileToCtx(ctx context.Context, profile profilesEntity.Profile) context.Context {
+	return context.WithValue(ctx, CtxKeyProfile, profile)
 }
