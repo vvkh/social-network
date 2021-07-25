@@ -1,4 +1,4 @@
-package profile_test
+package friends_requests_test
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	friendshipMocks "github.com/vvkh/social-network/internal/domain/friendship/mocks"
+	"github.com/vvkh/social-network/internal/domain/friendship/mocks"
 	"github.com/vvkh/social-network/internal/domain/profiles/entity"
 	"github.com/vvkh/social-network/internal/middlewares"
 	"github.com/vvkh/social-network/internal/server"
@@ -32,7 +32,7 @@ func TestProfilePageFriendshipRequest(t *testing.T) {
 				ID:     3,
 				UserID: 4,
 			},
-			url:        "/profiles/1/friendship/",
+			url:        "/friends/requests/1/create/",
 			wantStatus: http.StatusFound,
 		},
 	}
@@ -40,7 +40,7 @@ func TestProfilePageFriendshipRequest(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			friendshipUseCase := friendshipMocks.NewMockUseCase(ctrl)
+			friendshipUseCase := mocks.NewMockUseCase(ctrl)
 			friendshipUseCase.EXPECT().CreateRequest(gomock.Any(), test.self.ID, test.profile.ID).Return(nil)
 
 			s := server.New(":80", "../../../templates", nil, nil, friendshipUseCase)

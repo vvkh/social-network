@@ -23,9 +23,7 @@
             You have declined friendship request
             <form method="POST" action="{{ printf "/friends/requests/%d/accept/" .Profile.ID }}"><input type="submit" value="Accept"></form>
         {{ else }}
-            <form method="POST" action="friendship/">
-                <input type="submit" value="request friendship">
-            </form>
+            <form method="POST" action="{{ printf "/friends/requests/%d/create/" .Profile.ID }}"><input type="submit" value="request friendship"></form>
         {{end}}
     {{ end }}
 {{ end }}

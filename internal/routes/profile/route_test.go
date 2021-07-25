@@ -42,7 +42,9 @@ func TestProfilePage(t *testing.T) {
 				State: friendshipEntity.StateNone,
 			},
 			wantStatus: http.StatusOK,
-			wantBody:   []string{`<input type="submit" value="request friendship">`},
+			wantBody: []string{
+				`<form method="POST" action="/friends/requests/1/create/"><input type="submit" value="request friendship"></form>`,
+			},
 		},
 		{
 			name: "has_accept_decline_request_buttons_for_pending_request",
@@ -106,6 +108,7 @@ func TestProfilePage(t *testing.T) {
 			wantStatus: http.StatusOK,
 			wantBody: []string{
 				`You are friends`,
+				//`<form method="POST" action="/profiles/1/friendship/stop"><input type="submit" value="Stop friendship"></form>`,
 			},
 		},
 		{
