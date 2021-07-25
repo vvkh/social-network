@@ -11,13 +11,14 @@
     {{ end }}
     {{ if ne .Profile.ID .Self.ID }}
         {{ if .IsWaitingFriendshipApproval }}
+            User wants to be a friend with you
             <form method="POST" action="{{ printf "/friends/requests/%d/accept/" .Profile.ID }}"><input type="submit" value="Accept"></form>
             <form method="POST" action="{{ printf "/friends/requests/%d/decline/" .Profile.ID }}"><input type="submit" value="Decline"></form>
         {{ else if .HasNotConfirmedFriendship}}
-            You've already sent friendship request
+            You have sent friendship request
         {{ else if .AreFriends }}
             You are friends
-            <form method="POST" action="{{ printf "/friends/%d/stop" .Profile.ID }}"><input type="submit" value="stop friendship"></form>
+            <form method="POST" action="{{ printf "/friends/%d/stop/" .Profile.ID }}"><input type="submit" value="stop friendship"></form>
         {{ else if .FriendshipRequestDeclined }}
             Your friendship request was declined
         {{ else if .FriendshipRequestDeclinedBySelf }}

@@ -64,6 +64,7 @@ func TestProfilePage(t *testing.T) {
 			},
 			wantStatus: http.StatusOK,
 			wantBody: []string{
+				"User wants to be a friend with you",
 				`<form method="POST" action="/friends/requests/1/accept/"><input type="submit" value="Accept"></form>`,
 				`<form method="POST" action="/friends/requests/1/decline/"><input type="submit" value="Decline"></form>`,
 			},
@@ -86,7 +87,7 @@ func TestProfilePage(t *testing.T) {
 			},
 			wantStatus: http.StatusOK,
 			wantBody: []string{
-				`You've already sent friendship request`,
+				`You have sent friendship request`,
 			},
 		},
 		{
@@ -108,7 +109,7 @@ func TestProfilePage(t *testing.T) {
 			wantStatus: http.StatusOK,
 			wantBody: []string{
 				`You are friends`,
-				`<form method="POST" action="/friends/1/stop"><input type="submit" value="stop friendship"></form>`,
+				`<form method="POST" action="/friends/1/stop/"><input type="submit" value="stop friendship"></form>`,
 			},
 		},
 		{
