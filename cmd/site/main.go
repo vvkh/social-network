@@ -30,10 +30,11 @@ func run() error {
 		return err
 	}
 
-	logger, err := zap.NewProduction()
+	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return err
 	}
+
 	sugarLogger := logger.Sugar()
 
 	profilesRepo, err := profilesRepository.NewDefault()
