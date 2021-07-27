@@ -48,7 +48,7 @@ func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersU
 	s.handler.Get("/logout/", logout.HandleGet("/"))
 	s.handler.Route("/register/", func(r chi.Router) {
 		r.Get("/", register.HandleGet(templates))
-		r.Post("/", register.HandlePost(usersUseCase, "/login/"))
+		r.Post("/", register.HandlePost(log, usersUseCase, "/login/"))
 	})
 	s.handler.Route("/friends/", func(r chi.Router) {
 		r.Get("/", authRequired(friends.Handle(friendshipUseCase, templates)))

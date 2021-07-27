@@ -13,6 +13,7 @@ import (
 	profilesUseCase "github.com/vvkh/social-network/internal/domain/profiles/usecase"
 	usersRepository "github.com/vvkh/social-network/internal/domain/users/repository"
 	usersUseCase "github.com/vvkh/social-network/internal/domain/users/usecase"
+	"github.com/vvkh/social-network/internal/heroku"
 	"github.com/vvkh/social-network/internal/server"
 )
 
@@ -30,6 +31,11 @@ func run() error {
 		return err
 	}
 
+	err = heroku.ConvertEnv()
+	if err != nil {
+		return err
+	}
+
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return err
@@ -37,6 +43,7 @@ func run() error {
 
 	sugarLogger := logger.Sugar()
 
+	// TODO: single db instance
 	profilesRepo, err := profilesRepository.NewDefault()
 	if err != nil {
 		return err

@@ -30,7 +30,7 @@ func AuthenticateUser(log *zap.SugaredLogger, usersUseCase users.UseCase, profil
 			ctx := r.Context()
 			token, err := usersUseCase.DecodeToken(ctx, encodedToken.Value)
 			if err != nil {
-				log.Warn("got error while decoding token, resetting it", "err", err)
+				log.Warnw("got error while decoding token, resetting it", "err", err)
 				http.SetCookie(w, cookies.EmptyAuthCookie)
 				next.ServeHTTP(w, r)
 				return
@@ -38,7 +38,7 @@ func AuthenticateUser(log *zap.SugaredLogger, usersUseCase users.UseCase, profil
 
 			profiles, err := profilesUseCase.GetByUserID(ctx, token.UserID)
 			if err != nil {
-				log.Error("got error while fetching user by id in auth MW", "err", err)
+				log.Errorw("got error while fetching user by id in auth MW", "err", err)
 				// we are not sure that profile doesn't exist, maybe it's just some temporary problem
 				next.ServeHTTP(w, r)
 				return

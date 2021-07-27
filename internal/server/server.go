@@ -19,11 +19,6 @@ type server struct {
 
 func NewFromEnv(log *zap.SugaredLogger, usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase) (*server, error) {
 	address := os.Getenv("SERVER_ADDRESS")
-	if address == "" {
-		host := os.Getenv("HOST")
-		port := os.Getenv("PORT")
-		address = host + ":" + port
-	}
 	templatesDir := os.Getenv("TEMPLATES_DIR")
 	log.Infow("starting server", "address", address, "templateDir", templatesDir)
 	s := New(log, address, templatesDir, usersUseCase, profilesUseCase, friendshipUseCase)
