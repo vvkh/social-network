@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 
 	friendshipRepository "github.com/vvkh/social-network/internal/domain/friendship/repository"
 	friendshipUseCase "github.com/vvkh/social-network/internal/domain/friendship/usecase"
@@ -29,6 +30,12 @@ func run() error {
 		return err
 	}
 
+	logger, err := zap.NewProduction()
+	if err != nil {
+		return err
+	}
+	sugarLogger := logger.Sugar()
+
 	profilesRepo, err := profilesRepository.NewDefault()
 	if err != nil {
 		return err
@@ -48,7 +55,7 @@ func run() error {
 	}
 
 	friendshipUC := friendshipUseCase.New(friendshipRepo, profilesUC)
-	s, err := server.NewFromEnv(usersUC, profilesUC, friendshipUC)
+	s, err := server.NewFromEnv(sugarLogger, usersUC, profilesUC, friendshipUC)
 	if err != nil {
 		return err
 	}

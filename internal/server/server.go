@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 
 	"github.com/vvkh/social-network/internal/domain/friendship"
 	"github.com/vvkh/social-network/internal/domain/profiles"
@@ -17,20 +18,20 @@ type server struct {
 	address string
 }
 
-func NewFromEnv(usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase) (*server, error) {
+func NewFromEnv(log *zap.SugaredLogger, usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase) (*server, error) {
 	address := os.Getenv("SERVER_ADDRESS")
 	templatesDir := os.Getenv("TEMPLATES_DIR")
-	s := New(address, templatesDir, usersUseCase, profilesUseCase, friendshipUseCase)
+	s := New(log, address, templatesDir, usersUseCase, profilesUseCase, friendshipUseCase)
 	return s, nil
 }
 
-func New(address string, tempalatesDir string, usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase) *server {
+func New(log *zap.SugaredLogger, address string, tempalatesDir string, usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase) *server {
 	router := chi.NewRouter()
 	s := server{
 		handler: router,
 		address: address,
 	}
-	s.setupRoutes(tempalatesDir, usersUseCase, profilesUseCase, friendshipUseCase)
+	s.setupRoutes(log, tempalatesDir, usersUseCase, profilesUseCase, friendshipUseCase)
 	return &s
 }
 

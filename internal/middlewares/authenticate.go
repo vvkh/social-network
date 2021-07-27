@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"github.com/vvkh/social-network/internal/cookies"
 	"github.com/vvkh/social-network/internal/domain/profiles"
 	profilesEntity "github.com/vvkh/social-network/internal/domain/profiles/entity"
@@ -16,7 +18,7 @@ const (
 	CtxKeyProfile = ctxKey(1)
 )
 
-func AuthenticateUser(usersUseCase users.UseCase, profilesUseCase profiles.UseCase) func(http.Handler) http.Handler {
+func AuthenticateUser(log *zap.SugaredLogger, usersUseCase users.UseCase, profilesUseCase profiles.UseCase) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			encodedToken, err := cookies.ReadAuthCookie(r)
@@ -28,6 +30,7 @@ func AuthenticateUser(usersUseCase users.UseCase, profilesUseCase profiles.UseCa
 			ctx := r.Context()
 			token, err := usersUseCase.DecodeToken(ctx, encodedToken.Value)
 			if err != nil {
+				log.Warn("got error while decoding token, resetting it", "err", err)
 				http.SetCookie(w, cookies.EmptyAuthCookie)
 				next.ServeHTTP(w, r)
 				return
@@ -35,6 +38,7 @@ func AuthenticateUser(usersUseCase users.UseCase, profilesUseCase profiles.UseCa
 
 			profiles, err := profilesUseCase.GetByUserID(ctx, token.UserID)
 			if err != nil {
+				log.Error("got error while fetching user by id in auth MW", "err", err)
 				// we are not sure that profile doesn't exist, maybe it's just some temporary problem
 				next.ServeHTTP(w, r)
 				return
