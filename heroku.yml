@@ -1,6 +1,10 @@
 build:
   docker:
-    web: Dockerfile
+    web: service.Dockerfile
+    migrator: migrator.Dockerfile
+
+release:
+  image: migrator
 
 run:
-  web: go-getting-started
+  web: make up
