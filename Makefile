@@ -24,9 +24,11 @@ fmt:
 generate:
 	 PATH=$$PATH:./bin go generate ./internal/...
 
-up:
+build:
 	mkdir -p ./bin
 	go build -o ./bin/site ./cmd/site
+
+up:
 	./bin/site
 
 db:

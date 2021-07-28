@@ -1,4 +1,3 @@
-// +heroku goVersion go1.16
 module github.com/vvkh/social-network
 
 go 1.16
