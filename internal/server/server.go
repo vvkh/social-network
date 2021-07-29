@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
@@ -15,14 +14,7 @@ import (
 type server struct {
 	handler *chi.Mux
 	address string
-}
-
-func NewFromEnv(log *zap.SugaredLogger, usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase) (*server, error) {
-	address := os.Getenv("SERVER_ADDRESS")
-	templatesDir := os.Getenv("TEMPLATES_DIR")
-	log.Infow("starting server", "address", address, "templateDir", templatesDir)
-	s := New(log, address, templatesDir, usersUseCase, profilesUseCase, friendshipUseCase)
-	return s, nil
+	log     *zap.SugaredLogger
 }
 
 func New(log *zap.SugaredLogger, address string, tempalatesDir string, usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase) *server {
@@ -30,12 +22,15 @@ func New(log *zap.SugaredLogger, address string, tempalatesDir string, usersUseC
 	s := server{
 		handler: router,
 		address: address,
+		log:     log,
 	}
 	s.setupRoutes(log, tempalatesDir, usersUseCase, profilesUseCase, friendshipUseCase)
 	return &s
 }
 
 func (s *server) Start() error {
+	s.log.Infow("starting server", "address", s.address)
+
 	httpServer := http.Server{
 		Handler: s.handler,
 		Addr:    s.address,

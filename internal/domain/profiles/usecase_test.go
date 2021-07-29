@@ -8,6 +8,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 
+	"github.com/vvkh/social-network/internal/config"
+	"github.com/vvkh/social-network/internal/db"
 	"github.com/vvkh/social-network/internal/domain/profiles/entity"
 	profilesRepository "github.com/vvkh/social-network/internal/domain/profiles/repository"
 	profilesUseCase "github.com/vvkh/social-network/internal/domain/profiles/usecase"
@@ -22,12 +24,16 @@ func TestProfiles(t *testing.T) {
 	err := godotenv.Load("../../../.env")
 	require.NoError(t, err)
 
-	profileRepo, err := profilesRepository.NewDefault()
+	conf := config.NewFromEnv()
+	appDB, err := db.New(conf.DBUrl)
+	require.NoError(t, err)
+
+	profileRepo := profilesRepository.New(appDB)
 	require.NoError(t, err)
 
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	repo, err := usersRepository.NewDefault()
+	repo := usersRepository.New(appDB)
 	require.NoError(t, err)
 
 	uc := usersUseCase.New(profilesUC, repo, "secret")
