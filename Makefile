@@ -1,4 +1,5 @@
 install: deps tools
+	@ls .env || cp .env.sample .env
 
 env:
 	make db
