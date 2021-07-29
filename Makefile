@@ -1,5 +1,5 @@
 install: deps tools
-	@ls .env || cp .env.sample .env
+	@ls .env 2> /dev/null || cp .env.sample .env
 
 env:
 	make db
@@ -8,6 +8,9 @@ env:
 
 up: build
 	./bin/site
+
+up-docker:
+	docker-compose up service
 
 check: generate test lint fmt
 

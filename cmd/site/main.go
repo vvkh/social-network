@@ -15,7 +15,6 @@ import (
 	profilesUseCase "github.com/vvkh/social-network/internal/domain/profiles/usecase"
 	usersRepository "github.com/vvkh/social-network/internal/domain/users/repository"
 	usersUseCase "github.com/vvkh/social-network/internal/domain/users/usecase"
-	"github.com/vvkh/social-network/internal/heroku"
 	"github.com/vvkh/social-network/internal/server"
 )
 
@@ -33,7 +32,7 @@ func run() error {
 		return err
 	}
 
-	err = heroku.ConvertEnv()
+	err = config.AdaptHerokuEnv()
 	if err != nil {
 		return err
 	}
