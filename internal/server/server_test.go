@@ -102,19 +102,6 @@ func TestAuthProtectedRoutesWithInvalidTokenRedirectsToLogin(t *testing.T) {
 			},
 			getProfileMockResponse: []profilesEntity.Profile{
 				{
-					ID:     3, // different profile id
-					UserID: 1,
-				},
-			},
-			wantResetCookie: true,
-		},
-		{
-			mocksToken: entity.AccessToken{
-				UserID:    1,
-				ProfileID: 2,
-			},
-			getProfileMockResponse: []profilesEntity.Profile{
-				{
 					ID:     2, // different user id
 					UserID: 3,
 				},
@@ -138,7 +125,7 @@ func TestAuthProtectedRoutesWithInvalidTokenRedirectsToLogin(t *testing.T) {
 				usersUseCase := mocks.NewMockUseCase(ctrl)
 				usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(test.mocksToken, nil)
 				profilesUseCase := profilesMock.NewMockUseCase(ctrl)
-				profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.mocksToken.UserID).Return(test.getProfileMockResponse, test.getProfileMockErr)
+				profilesUseCase.EXPECT().GetByID(gomock.Any(), test.mocksToken.ProfileID).Return(test.getProfileMockResponse, test.getProfileMockErr)
 				log, _ := zap.NewDevelopment()
 				s := New(log.Sugar(), ":80", "../../templates", usersUseCase, profilesUseCase, nil)
 

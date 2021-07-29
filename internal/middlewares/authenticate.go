@@ -36,23 +36,26 @@ func AuthenticateUser(log *zap.SugaredLogger, usersUseCase users.UseCase, profil
 				return
 			}
 
-			profiles, err := profilesUseCase.GetByUserID(ctx, token.UserID)
-			if err != nil {
-				log.Errorw("got error while fetching user by id in auth MW", "err", err)
-				// we are not sure that profile doesn't exist, maybe it's just some temporary problem
+			profilesByID, err := profilesUseCase.GetByID(ctx, token.ProfileID)
+			if err != nil || len(profilesByID) == 0 {
+				log.Errorw("got error while fetching profilesByID by id in auth MW", "err", err)
+				http.SetCookie(w, cookies.EmptyAuthCookie)
+				next.ServeHTTP(w, r)
+				return
+			}
+			profile := profilesByID[0]
+			if profile.UserID != token.UserID {
+				log.Warnw("profile belongs to user different from one in auth token, resetting token",
+					"profile", profile.ID,
+					"expected_user", profile.UserID,
+					"user", token.UserID)
+				http.SetCookie(w, cookies.EmptyAuthCookie)
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			for _, profile := range profiles {
-				if profile.UserID == token.UserID && profile.ID == token.ProfileID {
-					ctx = AddProfileToCtx(ctx, profile)
-					r = r.WithContext(ctx)
-					next.ServeHTTP(w, r)
-					return
-				}
-			}
-			http.SetCookie(w, cookies.EmptyAuthCookie)
+			ctx = AddProfileToCtx(ctx, profile)
+			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
