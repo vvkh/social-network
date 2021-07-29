@@ -1,5 +1,15 @@
 install: deps tools
 
+env:
+	make db
+	sleep 30
+	make migrate
+
+up: build
+	./bin/site
+
+check: generate test lint fmt
+
 deps:
 	go mod tidy
 	go mod vendor
@@ -28,9 +38,6 @@ build:
 	mkdir -p ./bin
 	go build -o ./bin/site ./cmd/site
 
-up:
-	./bin/site
-
 db:
 	docker-compose down
 	docker-compose up -d db
@@ -38,8 +45,4 @@ db:
 migrate:
 	docker-compose up migrate
 
-env:
-	make db
-	sleep 30
-	make migrate
 
