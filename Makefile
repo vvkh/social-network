@@ -1,4 +1,18 @@
 install: deps tools
+	@ls .env 2> /dev/null || cp .env.sample .env
+
+env:
+	make db
+	sleep 30
+	make migrate
+
+up: build
+	./bin/site
+
+up-docker:
+	docker-compose up service
+
+check: generate test lint fmt
 
 deps:
 	go mod tidy
@@ -24,10 +38,9 @@ fmt:
 generate:
 	 PATH=$$PATH:./bin go generate ./internal/...
 
-up:
+build:
 	mkdir -p ./bin
 	go build -o ./bin/site ./cmd/site
-	./bin/site
 
 db:
 	docker-compose down
@@ -36,8 +49,4 @@ db:
 migrate:
 	docker-compose up migrate
 
-env:
-	make db
-	sleep 30
-	make migrate
 

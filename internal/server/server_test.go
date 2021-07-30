@@ -9,6 +9,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
 	friendshipMock "github.com/vvkh/social-network/internal/domain/friendship/mocks"
 	profilesEntity "github.com/vvkh/social-network/internal/domain/profiles/entity"
@@ -64,7 +65,8 @@ func TestAuthProtectedRoutesRedirectToLogin(t *testing.T) {
 			usersUseCase := mocks.NewMockUseCase(ctrl)
 			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
 			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
-			s := New(":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
+			log, _ := zap.NewDevelopment()
+			s := New(log.Sugar(), ":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
 
 			request := httptest.NewRequest(route.method, route.url, nil)
 			responseWriter := httptest.NewRecorder()
@@ -100,19 +102,6 @@ func TestAuthProtectedRoutesWithInvalidTokenRedirectsToLogin(t *testing.T) {
 			},
 			getProfileMockResponse: []profilesEntity.Profile{
 				{
-					ID:     3, // different profile id
-					UserID: 1,
-				},
-			},
-			wantResetCookie: true,
-		},
-		{
-			mocksToken: entity.AccessToken{
-				UserID:    1,
-				ProfileID: 2,
-			},
-			getProfileMockResponse: []profilesEntity.Profile{
-				{
 					ID:     2, // different user id
 					UserID: 3,
 				},
@@ -136,8 +125,9 @@ func TestAuthProtectedRoutesWithInvalidTokenRedirectsToLogin(t *testing.T) {
 				usersUseCase := mocks.NewMockUseCase(ctrl)
 				usersUseCase.EXPECT().DecodeToken(gomock.Any(), gomock.Any()).Return(test.mocksToken, nil)
 				profilesUseCase := profilesMock.NewMockUseCase(ctrl)
-				profilesUseCase.EXPECT().GetByUserID(gomock.Any(), test.mocksToken.UserID).Return(test.getProfileMockResponse, test.getProfileMockErr)
-				s := New(":80", "../../templates", usersUseCase, profilesUseCase, nil)
+				profilesUseCase.EXPECT().GetByID(gomock.Any(), test.mocksToken.ProfileID).Return(test.getProfileMockResponse, test.getProfileMockErr)
+				log, _ := zap.NewDevelopment()
+				s := New(log.Sugar(), ":80", "../../templates", usersUseCase, profilesUseCase, nil)
 
 				request := httptest.NewRequest(route.method, route.url, nil)
 				request.AddCookie(&http.Cookie{

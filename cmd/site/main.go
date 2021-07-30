@@ -5,7 +5,10 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 
+	"github.com/vvkh/social-network/internal/config"
+	"github.com/vvkh/social-network/internal/db"
 	friendshipRepository "github.com/vvkh/social-network/internal/domain/friendship/repository"
 	friendshipUseCase "github.com/vvkh/social-network/internal/domain/friendship/usecase"
 	profilesRepository "github.com/vvkh/social-network/internal/domain/profiles/repository"
@@ -24,34 +27,39 @@ func main() {
 }
 
 func run() error {
-	err := godotenv.Load()
+	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return err
 	}
 
-	profilesRepo, err := profilesRepository.NewDefault()
+	sugarLogger := logger.Sugar()
+
+	err = godotenv.Load()
+	if err != nil {
+		sugarLogger.Warn(".env file was not loaded")
+	}
+
+	err = config.AdaptHerokuEnv()
 	if err != nil {
 		return err
 	}
 
+	appConfig := config.NewFromEnv()
+
+	appDB, err := db.New(appConfig.DBUrl)
+	if err != nil {
+		return err
+	}
+
+	profilesRepo := profilesRepository.New(appDB)
 	profilesUC := profilesUseCase.New(profilesRepo)
-	usersRepo, err := usersRepository.NewDefault()
-	if err != nil {
-		return err
-	}
 
-	usersUC := usersUseCase.NewFromEnv(profilesUC, usersRepo)
+	usersRepo := usersRepository.New(appDB)
+	usersUC := usersUseCase.New(profilesUC, usersRepo, appConfig.AuthSecret)
 
-	friendshipRepo, err := friendshipRepository.NewDefault()
-	if err != nil {
-		return err
-	}
-
+	friendshipRepo := friendshipRepository.New(appDB)
 	friendshipUC := friendshipUseCase.New(friendshipRepo, profilesUC)
-	s, err := server.NewFromEnv(usersUC, profilesUC, friendshipUC)
-	if err != nil {
-		return err
-	}
 
+	s := server.New(sugarLogger, appConfig.ServerAddress, appConfig.TemplatesDir, usersUC, profilesUC, friendshipUC)
 	return s.Start()
 }

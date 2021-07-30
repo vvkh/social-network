@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
 	"github.com/vvkh/social-network/internal/domain/friendship/mocks"
 	"github.com/vvkh/social-network/internal/domain/profiles/entity"
@@ -63,8 +64,8 @@ func TestFriendshipRequestPage(t *testing.T) {
 			request := httptest.NewRequest("GET", "/friends/requests/", nil)
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))
 			responseWriter := httptest.NewRecorder()
-
-			s := server.New(":80", "../../../templates", nil, nil, friendshipUseCase)
+			log, _ := zap.NewDevelopment()
+			s := server.New(log.Sugar(), ":80", "../../../templates", nil, nil, friendshipUseCase)
 			s.Handle(responseWriter, request)
 
 			response := responseWriter.Result()

@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"github.com/vvkh/social-network/internal/cookies"
 	"github.com/vvkh/social-network/internal/domain/profiles"
 	profilesEntity "github.com/vvkh/social-network/internal/domain/profiles/entity"
@@ -16,7 +18,7 @@ const (
 	CtxKeyProfile = ctxKey(1)
 )
 
-func AuthenticateUser(usersUseCase users.UseCase, profilesUseCase profiles.UseCase) func(http.Handler) http.Handler {
+func AuthenticateUser(log *zap.SugaredLogger, usersUseCase users.UseCase, profilesUseCase profiles.UseCase) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			encodedToken, err := cookies.ReadAuthCookie(r)
@@ -28,27 +30,32 @@ func AuthenticateUser(usersUseCase users.UseCase, profilesUseCase profiles.UseCa
 			ctx := r.Context()
 			token, err := usersUseCase.DecodeToken(ctx, encodedToken.Value)
 			if err != nil {
+				log.Warnw("got error while decoding token, resetting it", "err", err)
 				http.SetCookie(w, cookies.EmptyAuthCookie)
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			profiles, err := profilesUseCase.GetByUserID(ctx, token.UserID)
-			if err != nil {
-				// we are not sure that profile doesn't exist, maybe it's just some temporary problem
+			profilesByID, err := profilesUseCase.GetByID(ctx, token.ProfileID)
+			if err != nil || len(profilesByID) == 0 {
+				log.Errorw("got error while fetching profilesByID by id in auth MW", "err", err)
+				http.SetCookie(w, cookies.EmptyAuthCookie)
+				next.ServeHTTP(w, r)
+				return
+			}
+			profile := profilesByID[0]
+			if profile.UserID != token.UserID {
+				log.Warnw("profile belongs to user different from one in auth token, resetting token",
+					"profile", profile.ID,
+					"expected_user", profile.UserID,
+					"user", token.UserID)
+				http.SetCookie(w, cookies.EmptyAuthCookie)
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			for _, profile := range profiles {
-				if profile.UserID == token.UserID && profile.ID == token.ProfileID {
-					ctx = AddProfileToCtx(ctx, profile)
-					r = r.WithContext(ctx)
-					next.ServeHTTP(w, r)
-					return
-				}
-			}
-			http.SetCookie(w, cookies.EmptyAuthCookie)
+			ctx = AddProfileToCtx(ctx, profile)
+			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)

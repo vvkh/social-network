@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"go.uber.org/zap"
 
 	"github.com/vvkh/social-network/internal/domain/friendship"
 	profilesDomain "github.com/vvkh/social-network/internal/domain/profiles"
@@ -27,7 +28,7 @@ const (
 	defaultHandlerTimeout = 60 * time.Second
 )
 
-func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase, profilesUseCase profilesDomain.UseCase, friendshipUseCase friendship.UseCase) {
+func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersUseCase users.UseCase, profilesUseCase profilesDomain.UseCase, friendshipUseCase friendship.UseCase) {
 	templates := templates.New(templatesDir, "bootstrap").Add("base.gohtml")
 
 	s.handler.Use(middleware.RequestID)
@@ -35,7 +36,7 @@ func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase, pr
 	s.handler.Use(middleware.Logger)
 	s.handler.Use(middleware.Recoverer)
 	s.handler.Use(middleware.Timeout(defaultHandlerTimeout))
-	s.handler.Use(middlewares.AuthenticateUser(usersUseCase, profilesUseCase))
+	s.handler.Use(middlewares.AuthenticateUser(log, usersUseCase, profilesUseCase))
 
 	authRequired := permissions.AuthRequired("/login/")
 
@@ -47,7 +48,7 @@ func (s *server) setupRoutes(templatesDir string, usersUseCase users.UseCase, pr
 	s.handler.Get("/logout/", logout.HandleGet("/"))
 	s.handler.Route("/register/", func(r chi.Router) {
 		r.Get("/", register.HandleGet(templates))
-		r.Post("/", register.HandlePost(usersUseCase, "/login/"))
+		r.Post("/", register.HandlePost(log, usersUseCase, "/login/"))
 	})
 	s.handler.Route("/friends/", func(r chi.Router) {
 		r.Get("/", authRequired(friends.Handle(friendshipUseCase, templates)))

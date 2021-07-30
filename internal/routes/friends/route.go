@@ -24,12 +24,12 @@ func Handle(friendshipUseCase friendship.UseCase, templates *templates.Templates
 			return
 		}
 
-		tempalateCtx := Contex{
+		templateCtx := Contex{
 			Self:                 dtoFromModel(self),
 			Friends:              dtoFromModels(friends),
 			PendingRequestsCount: len(pendingFriendshipRequests),
 		}
-		err = render(writer, tempalateCtx)
+		err = render(writer, templateCtx)
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return

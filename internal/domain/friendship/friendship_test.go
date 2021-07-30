@@ -8,6 +8,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 
+	"github.com/vvkh/social-network/internal/config"
+	"github.com/vvkh/social-network/internal/db"
 	"github.com/vvkh/social-network/internal/domain/friendship/repository"
 	"github.com/vvkh/social-network/internal/domain/friendship/usecase"
 	"github.com/vvkh/social-network/internal/domain/profiles/entity"
@@ -24,19 +26,17 @@ func TestAcceptFriendshipRequest(t *testing.T) {
 	err := godotenv.Load("../../../.env")
 	require.NoError(t, err)
 
-	profileRepo, err := profilesRepository.NewDefault()
+	conf := config.NewFromEnv()
+	appDB, err := db.New(conf.DBUrl)
 	require.NoError(t, err)
 
+	profileRepo := profilesRepository.New(appDB)
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	usersRepo, err := usersRepository.NewDefault()
-	require.NoError(t, err)
-
+	usersRepo := usersRepository.New(appDB)
 	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
 
-	repo, err := repository.NewDefault()
-	require.NoError(t, err)
-
+	repo := repository.New(appDB)
 	uc := usecase.New(repo, profilesUC)
 
 	ctx := context.Background()
@@ -95,19 +95,17 @@ func TestDeclineFriendshipRequest(t *testing.T) {
 	err := godotenv.Load("../../../.env")
 	require.NoError(t, err)
 
-	profileRepo, err := profilesRepository.NewDefault()
+	conf := config.NewFromEnv()
+	appDB, err := db.New(conf.DBUrl)
 	require.NoError(t, err)
 
+	profileRepo := profilesRepository.New(appDB)
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	usersRepo, err := usersRepository.NewDefault()
-	require.NoError(t, err)
-
+	usersRepo := usersRepository.New(appDB)
 	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
 
-	repo, err := repository.NewDefault()
-	require.NoError(t, err)
-
+	repo := repository.New(appDB)
 	uc := usecase.New(repo, profilesUC)
 
 	ctx := context.Background()
@@ -177,19 +175,17 @@ func TestStopFriendship(t *testing.T) {
 	err := godotenv.Load("../../../.env")
 	require.NoError(t, err)
 
-	profileRepo, err := profilesRepository.NewDefault()
+	conf := config.NewFromEnv()
+	appDB, err := db.New(conf.DBUrl)
 	require.NoError(t, err)
 
+	profileRepo := profilesRepository.New(appDB)
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	usersRepo, err := usersRepository.NewDefault()
-	require.NoError(t, err)
-
+	usersRepo := usersRepository.New(appDB)
 	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
 
-	repo, err := repository.NewDefault()
-	require.NoError(t, err)
-
+	repo := repository.New(appDB)
 	uc := usecase.New(repo, profilesUC)
 
 	ctx := context.Background()
@@ -235,19 +231,17 @@ func TestGetFriendshipStatus(t *testing.T) {
 	err := godotenv.Load("../../../.env")
 	require.NoError(t, err)
 
-	profileRepo, err := profilesRepository.NewDefault()
+	conf := config.NewFromEnv()
+	appDB, err := db.New(conf.DBUrl)
 	require.NoError(t, err)
 
+	profileRepo := profilesRepository.New(appDB)
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	usersRepo, err := usersRepository.NewDefault()
-	require.NoError(t, err)
+	usersRepo := usersRepository.New(appDB)
+	usersUC := usersUseCase.New(profilesUC, usersRepo, conf.AuthSecret)
 
-	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
-
-	repo, err := repository.NewDefault()
-	require.NoError(t, err)
-
+	repo := repository.New(appDB)
 	uc := usecase.New(repo, profilesUC)
 
 	ctx := context.Background()

@@ -1,11 +1,10 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 
 	"github.com/vvkh/social-network/internal/domain/friendship"
 	"github.com/vvkh/social-network/internal/domain/profiles"
@@ -15,31 +14,27 @@ import (
 type server struct {
 	handler *chi.Mux
 	address string
+	log     *zap.SugaredLogger
 }
 
-func NewFromEnv(usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase) (*server, error) {
-	address := os.Getenv("SERVER_ADDRESS")
-	templatesDir := os.Getenv("TEMPLATES_DIR")
-	s := New(address, templatesDir, usersUseCase, profilesUseCase, friendshipUseCase)
-	return s, nil
-}
-
-func New(address string, tempalatesDir string, usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase) *server {
+func New(log *zap.SugaredLogger, address string, tempalatesDir string, usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase) *server {
 	router := chi.NewRouter()
 	s := server{
 		handler: router,
 		address: address,
+		log:     log,
 	}
-	s.setupRoutes(tempalatesDir, usersUseCase, profilesUseCase, friendshipUseCase)
+	s.setupRoutes(log, tempalatesDir, usersUseCase, profilesUseCase, friendshipUseCase)
 	return &s
 }
 
 func (s *server) Start() error {
+	s.log.Infow("starting server", "address", s.address)
+
 	httpServer := http.Server{
 		Handler: s.handler,
 		Addr:    s.address,
 	}
-	fmt.Printf("starting server on %s", s.address)
 	return httpServer.ListenAndServe()
 }
 

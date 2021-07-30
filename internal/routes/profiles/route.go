@@ -12,7 +12,7 @@ func Handle(profilesUseCase profiles.UseCase, templates *templates.Templates) ht
 	render := templates.Add("profiles.gohtml").Parse()
 
 	return func(writer http.ResponseWriter, request *http.Request) {
-		profile, _ := middlewares.ProfileFromCtx(request.Context())
+		self, _ := middlewares.ProfileFromCtx(request.Context())
 
 		profiles, err := profilesUseCase.ListProfiles(request.Context())
 		if err != nil {
@@ -20,11 +20,8 @@ func Handle(profilesUseCase profiles.UseCase, templates *templates.Templates) ht
 			return
 		}
 		context := Context{
-			Self:     dtoFromModel(profile),
-			Profiles: make([]Dto, 0, len(profiles)),
-		}
-		for _, profile := range profiles {
-			context.Profiles = append(context.Profiles, dtoFromModel(profile))
+			Self:     dtoFromModel(self),
+			Profiles: dtoFromModels(profiles),
 		}
 
 		err = render(writer, context)

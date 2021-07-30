@@ -22,3 +22,11 @@ func dtoFromModel(profile entity.Profile) Dto {
 		LastName:  profile.LastName,
 	}
 }
+
+func dtoFromModels(profiles []entity.Profile) []Dto {
+	dtos := make([]Dto, 0, len(profiles))
+	for _, profile := range profiles {
+		dtos = append(dtos, dtoFromModel(profile))
+	}
+	return dtos
+}

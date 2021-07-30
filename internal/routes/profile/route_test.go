@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
 	friendshipEntity "github.com/vvkh/social-network/internal/domain/friendship/entity"
 	friendshipMocks "github.com/vvkh/social-network/internal/domain/friendship/mocks"
@@ -164,7 +165,8 @@ func TestProfilePage(t *testing.T) {
 			profilesUseCase.EXPECT().GetByID(gomock.Any(), test.profile.ID).Return([]entity.Profile{test.profile}, nil)
 			friendshipUseCase := friendshipMocks.NewMockUseCase(ctrl)
 			friendshipUseCase.EXPECT().GetFriendshipStatus(gomock.Any(), test.profile.ID, test.self.ID).Return(test.friendshipStatus, nil)
-			s := server.New(":80", "../../../templates", nil, profilesUseCase, friendshipUseCase)
+			log, _ := zap.NewDevelopment()
+			s := server.New(log.Sugar(), ":80", "../../../templates", nil, profilesUseCase, friendshipUseCase)
 
 			request := httptest.NewRequest("GET", test.url, nil)
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))

@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"go.uber.org/zap"
+
 	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/templates"
 )
@@ -19,7 +21,7 @@ func HandleGet(templates *templates.Templates) http.HandlerFunc {
 	}
 }
 
-func HandlePost(useCase users.UseCase, redirectPath string) http.HandlerFunc {
+func HandlePost(log *zap.SugaredLogger, useCase users.UseCase, redirectPath string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		// TODO: error handling
 		_ = request.ParseForm()
@@ -35,6 +37,7 @@ func HandlePost(useCase users.UseCase, redirectPath string) http.HandlerFunc {
 
 		_, _, err := useCase.CreateUser(request.Context(), username, password, firstName, lastName, uint8(age), location, sex, about)
 		if err != nil {
+			log.Errorw("error while creating user", "err", err)
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
