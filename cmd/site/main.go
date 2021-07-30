@@ -27,9 +27,16 @@ func main() {
 }
 
 func run() error {
-	err := godotenv.Load()
+	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return err
+	}
+
+	sugarLogger := logger.Sugar()
+
+	err = godotenv.Load()
+	if err != nil {
+		sugarLogger.Warn(".env file was not loaded")
 	}
 
 	err = config.AdaptHerokuEnv()
@@ -38,13 +45,6 @@ func run() error {
 	}
 
 	appConfig := config.NewFromEnv()
-
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		return err
-	}
-
-	sugarLogger := logger.Sugar()
 
 	appDB, err := db.New(appConfig.DBUrl)
 	if err != nil {
