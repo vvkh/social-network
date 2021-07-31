@@ -6,10 +6,14 @@ import (
 	"sort"
 	"time"
 
+	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/domain/users/entity"
 )
 
 func (u *usecase) Login(ctx context.Context, username string, password string) (string, error) {
+	if username == "" || password == "" {
+		return "", users.EmptyCredentials
+	}
 	userID, err := u.repo.Login(ctx, username, password)
 	if err != nil {
 		return "", err

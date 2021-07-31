@@ -8,6 +8,9 @@
    <label for="password">Password</label>
    <input id="password" name="password" type="password" />
 
-   <input type="submit">
+   <input type="submit" value="login" />
+   {{ if .Error }}
+      <p>{{.Error}}</p>
+   {{ end }}
 </form>
 {{ end }}

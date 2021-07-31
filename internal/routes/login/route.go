@@ -1,7 +1,10 @@
 package login
 
 import (
+	"errors"
 	"net/http"
+
+	"go.uber.org/zap"
 
 	"github.com/vvkh/social-network/internal/cookies"
 	"github.com/vvkh/social-network/internal/domain/users"
@@ -16,17 +19,42 @@ func HandleGet(templates *templates.Templates) http.HandlerFunc {
 	}
 }
 
-func HandlePost(useCase users.UseCase, redirectPath string) http.HandlerFunc {
+func HandlePost(log *zap.SugaredLogger, useCase users.UseCase, redirectPath string, templates *templates.Templates) http.HandlerFunc {
+	render := templates.Add("login.gohtml").Parse()
+
 	return func(writer http.ResponseWriter, request *http.Request) {
-		// TODO: error handling
 		// TODO: add CSRF token
-		_ = request.ParseForm()
+		if err := request.ParseForm(); err != nil {
+			writer.WriteHeader(http.StatusBadRequest)
+			_ = render(writer, Dto{
+				Error: "bad form sent",
+			})
+			return
+		}
 
 		username := request.Form.Get("username")
 		password := request.Form.Get("password")
 		token, err := useCase.Login(request.Context(), username, password)
-		if err != nil {
+		if errors.Is(err, users.AuthenticationFailed) {
 			writer.WriteHeader(http.StatusForbidden)
+			_ = render(writer, Dto{
+				Error: "authentication failed",
+			})
+			return
+		}
+		if errors.Is(err, users.EmptyCredentials) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_ = render(writer, Dto{
+				Error: "both password and username are required",
+			})
+			return
+		}
+		if err != nil {
+			log.Errorw("error while performing login", "err", err)
+			writer.WriteHeader(http.StatusInternalServerError)
+			_ = render(writer, Dto{
+				Error: "server failed",
+			})
 			return
 		}
 
