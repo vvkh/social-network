@@ -7,7 +7,7 @@
    <input id="username" name="username" type="text" placeholder="johndoe" required/><br/>
 
    <label for="password">Password</label>
-   <input id="password" name="password" type="password" /><br/>
+   <input id="password" name="password" type="password" required/><br/>
 
 
    <label for="first_name">First Name</label>
@@ -30,6 +30,9 @@
 
    <label for="about">About</label>
    <textarea id="about" name="about" placeholder="A few words about me..."></textarea><br/>
-   <input type="submit">
+   <input type="submit" value="register"/>
+   {{ if .Error }}
+      <p>{{.Error}}</p>
+   {{ end }}
 </form>
 {{ end }}

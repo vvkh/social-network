@@ -32,8 +32,8 @@ func TestHandleGet(t *testing.T) {
 	require.NoError(t, err)
 
 	page := string(body)
-	require.Contains(t, page, `<input id="username" name="username" type="text" placeholder="John Doe" />`)
-	require.Contains(t, page, `<input id="password" name="password" type="password" />`)
+	require.Contains(t, page, `<input id="username" name="username" type="text" placeholder="John Doe" required />`)
+	require.Contains(t, page, `<input id="password" name="password" type="password" required />`)
 	require.Contains(t, page, `<input type="submit" value="login" />`)
 }
 
@@ -102,9 +102,8 @@ func TestHandlePost(t *testing.T) {
 			log := zap.NewNop().Sugar()
 			ctrl := gomock.NewController(t)
 			usersUC := mocks.NewMockUseCase(ctrl)
-			if test.mockWantIn != nil {
-				usersUC.EXPECT().Login(gomock.Any(), test.mockWantIn.username, test.mockWantIn.password).Return(test.mockResponse, test.mockResponseError)
-			}
+			usersUC.EXPECT().Login(gomock.Any(), test.mockWantIn.username, test.mockWantIn.password).Return(test.mockResponse, test.mockResponseError)
+
 			s := server.New(log, ":80", "../../../templates", usersUC, nil, nil)
 			form := strings.NewReader(test.form)
 			request := httptest.NewRequest("POST", "/login/", form)
