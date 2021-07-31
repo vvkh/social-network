@@ -19,6 +19,7 @@ func HandleGet(templates *templates.Templates) http.HandlerFunc {
 func HandlePost(useCase users.UseCase, redirectPath string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		// TODO: error handling
+		// TODO: add CSRF token
 		_ = request.ParseForm()
 
 		username := request.Form.Get("username")
