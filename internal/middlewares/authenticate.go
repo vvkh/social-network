@@ -30,22 +30,29 @@ func AuthenticateUser(log *zap.SugaredLogger, usersUseCase users.UseCase, profil
 			ctx := r.Context()
 			token, err := usersUseCase.DecodeToken(ctx, encodedToken.Value)
 			if err != nil {
-				log.Warnw("got error while decoding token, resetting it", "err", err)
+				log.Warnw("got error while decoding token", "err", err)
 				http.SetCookie(w, cookies.EmptyAuthCookie)
 				next.ServeHTTP(w, r)
 				return
 			}
 
 			profilesByID, err := profilesUseCase.GetByID(ctx, token.ProfileID)
-			if err != nil || len(profilesByID) == 0 {
+			if err != nil {
 				log.Errorw("got error while fetching profilesByID by id in auth MW", "err", err)
 				http.SetCookie(w, cookies.EmptyAuthCookie)
 				next.ServeHTTP(w, r)
 				return
 			}
+			if len(profilesByID) == 0 {
+				log.Warnw("got token with non-existing profile", "profileID", token.ProfileID)
+				http.SetCookie(w, cookies.EmptyAuthCookie)
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			profile := profilesByID[0]
 			if profile.UserID != token.UserID {
-				log.Warnw("profile belongs to user different from one in auth token, resetting token",
+				log.Warnw("profile belongs to user different from one in auth token",
 					"profile", profile.ID,
 					"expected_user", profile.UserID,
 					"user", token.UserID)

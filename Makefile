@@ -6,6 +6,9 @@ env:
 	sleep 30
 	make migrate
 
+stop-env:
+	docker-compose stop
+
 up: build
 	./bin/site
 
