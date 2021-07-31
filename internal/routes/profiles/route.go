@@ -3,12 +3,14 @@ package profiles
 import (
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"github.com/vvkh/social-network/internal/domain/profiles"
 	"github.com/vvkh/social-network/internal/middlewares"
 	"github.com/vvkh/social-network/internal/templates"
 )
 
-func Handle(profilesUseCase profiles.UseCase, templates *templates.Templates) http.HandlerFunc {
+func Handle(log *zap.SugaredLogger, profilesUseCase profiles.UseCase, templates *templates.Templates) http.HandlerFunc {
 	render := templates.Add("profiles.gohtml").Parse()
 
 	return func(writer http.ResponseWriter, request *http.Request) {
@@ -16,6 +18,7 @@ func Handle(profilesUseCase profiles.UseCase, templates *templates.Templates) ht
 
 		profiles, err := profilesUseCase.ListProfiles(request.Context())
 		if err != nil {
+			log.Errorw("error while listing profiles", "err", err)
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -26,6 +29,7 @@ func Handle(profilesUseCase profiles.UseCase, templates *templates.Templates) ht
 
 		err = render(writer, context)
 		if err != nil {
+			log.Errorw("error while rendering profiles", "err", err)
 			writer.WriteHeader(http.StatusInternalServerError)
 		}
 	}

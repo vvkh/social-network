@@ -62,7 +62,7 @@ func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersU
 
 	})
 	s.handler.Route("/profiles/", func(r chi.Router) {
-		r.Get("/", authRequired(profiles.Handle(profilesUseCase, templates)))
+		r.Get("/", authRequired(profiles.Handle(log, profilesUseCase, templates)))
 		r.Get("/{profileID:[0-9]+}/", authRequired(profile.Handle(profilesUseCase, friendshipUseCase, templates)))
 	})
 }
