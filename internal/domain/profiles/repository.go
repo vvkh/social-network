@@ -13,4 +13,5 @@ type Repository interface {
 	GetByID(ctx context.Context, id ...uint64) ([]entity.Profile, error)
 	GetByUserID(ctx context.Context, id uint64) ([]entity.Profile, error)
 	ListProfiles(ctx context.Context) ([]entity.Profile, error)
+	GetByName(ctx context.Context, firstNamePrefix string, lastNamePrefix string) ([]entity.Profile, error)
 }
