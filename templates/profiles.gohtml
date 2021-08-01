@@ -2,6 +2,14 @@
 
 {{ define "content" }}
     <h1>Users</h1>
+    <form method="GET">
+        <label for="first_name">First Name</label>
+        <input id="first_name" name="first_name" type="text" placeholder="John" value="{{ .Filters.FirstName }}" />
+        <br/>
+        <label for="last_name">Last Name</label>
+        <input id="last_name" name="last_name" type="text" placeholder="Doe" value="{{ .Filters.LastName }}" />
+        <input type="submit" value="search"/>
+    </form>
     <ul>
     {{ range .Profiles }}
         <li>

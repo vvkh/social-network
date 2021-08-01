@@ -9,9 +9,15 @@ type Dto struct {
 	UserID    uint64
 }
 
+type Filters struct {
+	FirstName string
+	LastName  string
+}
+
 type Context struct {
 	Self     Dto
 	Profiles []Dto
+	Filters  Filters
 }
 
 func dtoFromModel(profile entity.Profile) Dto {
