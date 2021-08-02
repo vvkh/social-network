@@ -44,6 +44,7 @@ generate:
 build:
 	mkdir -p ./bin
 	go build -o ./bin/site ./cmd/site
+	go build -o ./bin/gendata ./cmd/gendata
 
 db:
 	docker-compose down
@@ -52,4 +53,8 @@ db:
 migrate:
 	docker-compose up migrate
 
+gen-bench: build
+	./bin/gendata --names benchmarks/data/names.txt --output benchmarks/data/requests.txt
 
+bench:
+	wrk --latency -d 60s -t 6 -c 6 -s benchmarks/register.lua http://localhost

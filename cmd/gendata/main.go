@@ -1,0 +1,103 @@
+package main
+
+import (
+	"bufio"
+	"errors"
+	"flag"
+	"fmt"
+	"math/rand"
+	"net/url"
+	"os"
+	"strings"
+)
+
+func main() {
+	var namesFilePath string
+	var requestsFilePath string
+	flag.StringVar(&requestsFilePath, "output", "requests.txt", "path to output with generated requests")
+	flag.StringVar(&namesFilePath, "names", "names.txt", "path to sample user names")
+	flag.Parse()
+
+	err := run(namesFilePath, requestsFilePath)
+	if err != nil {
+		fmt.Printf("error while generating data: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func run(namesFilePath string, requestsFilePath string) error {
+	namesFile, err := os.Open(namesFilePath)
+	if err != nil {
+		return err
+	}
+	defer namesFile.Close()
+
+	requestsFile, err := os.Create(requestsFilePath)
+	if err != nil {
+		return err
+	}
+	defer requestsFile.Close()
+
+	reader := bufio.NewReader(namesFile)
+	for {
+		line, _, err := reader.ReadLine()
+		if err != nil {
+			break
+		}
+		fullName := strings.Split(string(line), " ")
+		if len(fullName) != 2 {
+			return errors.New("got line with number of words not equal to 2")
+		}
+		firstName, lastName := fullName[0], fullName[1]
+		form := makeRegisterForm(makeUser(firstName, lastName))
+		_, err = requestsFile.WriteString(form + "\n")
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type User struct {
+	UserName  string
+	Password  string
+	FirstName string
+	LastName  string
+	Age       string
+	Sex       string
+	Location  string
+	About     string
+}
+
+var (
+	possibleSex       = []string{"male", "female"}
+	possibleLocations = []string{"USA", "Russia", "UK", "Canada", "Germany", "Norway", "Poland"}
+	minPossibleAge    = 18
+	maxPossibleAge    = 100
+)
+
+func makeUser(firstName string, lastName string) User {
+	return User{
+		UserName:  strings.ToLower(firstName + lastName),
+		Password:  strings.ToLower(firstName + lastName),
+		Age:       fmt.Sprintf("%d", minPossibleAge+rand.Intn(maxPossibleAge-minPossibleAge)), //nolint:gosec
+		FirstName: firstName,
+		LastName:  lastName,
+		Sex:       possibleSex[rand.Intn(len(possibleSex))],             //nolint:gosec
+		Location:  possibleLocations[rand.Intn(len(possibleLocations))], //nolint:gosec
+		About:     "",
+	}
+}
+
+func makeRegisterForm(user User) string {
+	form := url.Values{}
+	form.Set("username", user.UserName)
+	form.Set("password", user.Password)
+	form.Set("first_name", user.FirstName)
+	form.Set("last_name", user.LastName)
+	form.Set("sex", user.Sex)
+	form.Set("about", user.About)
+	form.Set("age", user.Age)
+	form.Set("location", user.Location)
+	return form.Encode()
+}
