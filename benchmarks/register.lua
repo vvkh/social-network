@@ -33,10 +33,7 @@ request = function()
     if counter > max_request then
         wrk.thread:stop()
     end
-    body = requests[counter]
-    if body == nil then
-    	print("counter = ", counter)
-    end
+
     return wrk.format(
         wrk.method,
         wrk.path,

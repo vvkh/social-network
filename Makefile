@@ -57,5 +57,8 @@ gen-bench: build
 	./bin/gendata --names benchmarks/data/names.txt --output benchmarks/requests/register.txt --test-name register
 	./bin/gendata --names benchmarks/data/names.txt --output benchmarks/requests/search.txt --test-name search
 
-bench:
+bench-register:
 	wrk --latency -d 60s -t 6 -c 6 -s benchmarks/register.lua http://localhost
+
+bench-search:
+	wrk --latency -d 5s -t 1 -c 1 -s benchmarks/search.lua http://localhost
