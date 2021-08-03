@@ -9,7 +9,7 @@ function read_file(file)
     end
     return lines
 end
-requests = read_file("benchmarks/data/requests.txt")
+requests = read_file("benchmarks/requests/register.txt")
 
 local thread_id_counter = 0
 local threads = {}

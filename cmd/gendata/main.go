@@ -11,21 +11,43 @@ import (
 	"strings"
 )
 
+type requestMaker func(string, string) string
+
+var (
+	tests = map[string]requestMaker{
+		"register": func(firstName string, lastName string) string {
+			return makeRegisterForm(makeUser(firstName, lastName))
+		},
+		"search": func(firstName string, lastName string) string {
+			return makeSearchByNameForm(firstName, lastName)
+		},
+	}
+)
+
 func main() {
 	var namesFilePath string
 	var requestsFilePath string
+	var testName string
+
 	flag.StringVar(&requestsFilePath, "output", "requests.txt", "path to output with generated requests")
 	flag.StringVar(&namesFilePath, "names", "names.txt", "path to sample user names")
+	flag.Func("test-name", "test name: (register, search)", func(value string) error {
+		if _, ok := tests[value]; !ok {
+			return errors.New("invalid test name, possible values are: register, search")
+		}
+		testName = value
+		return nil
+	})
 	flag.Parse()
 
-	err := run(namesFilePath, requestsFilePath)
+	err := run(namesFilePath, requestsFilePath, testName)
 	if err != nil {
 		fmt.Printf("error while generating data: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func run(namesFilePath string, requestsFilePath string) error {
+func run(namesFilePath string, requestsFilePath string, testName string) error {
 	namesFile, err := os.Open(namesFilePath)
 	if err != nil {
 		return err
@@ -38,6 +60,11 @@ func run(namesFilePath string, requestsFilePath string) error {
 	}
 	defer requestsFile.Close()
 
+	makeRequest, ok := tests[testName]
+	if !ok {
+		return errors.New("invalid test name")
+	}
+
 	reader := bufio.NewReader(namesFile)
 	for {
 		line, _, err := reader.ReadLine()
@@ -49,8 +76,8 @@ func run(namesFilePath string, requestsFilePath string) error {
 			return errors.New("got line with number of words not equal to 2")
 		}
 		firstName, lastName := fullName[0], fullName[1]
-		form := makeRegisterForm(makeUser(firstName, lastName))
-		_, err = requestsFile.WriteString(form + "\n")
+		request := makeRequest(firstName, lastName)
+		_, err = requestsFile.WriteString(request + "\n")
 		if err != nil {
 			return err
 		}
@@ -99,5 +126,14 @@ func makeRegisterForm(user User) string {
 	form.Set("about", user.About)
 	form.Set("age", user.Age)
 	form.Set("location", user.Location)
+	return form.Encode()
+}
+
+func makeSearchByNameForm(firstName string, lastName string) string {
+	firstNamePrefix := firstName[:1+rand.Intn(len(firstName)-1)]
+	lastNamePrefix := lastName[:1+rand.Intn(len(lastName)-1)]
+	form := url.Values{}
+	form.Set("first_name", firstNamePrefix)
+	form.Set("last_name", lastNamePrefix)
 	return form.Encode()
 }

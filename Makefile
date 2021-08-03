@@ -54,7 +54,8 @@ migrate:
 	docker-compose up migrate
 
 gen-bench: build
-	./bin/gendata --names benchmarks/data/names.txt --output benchmarks/data/requests.txt
+	./bin/gendata --names benchmarks/data/names.txt --output benchmarks/requests/register.txt --test-name register
+	./bin/gendata --names benchmarks/data/names.txt --output benchmarks/requests/search.txt --test-name search
 
 bench:
 	wrk --latency -d 60s -t 6 -c 6 -s benchmarks/register.lua http://localhost
