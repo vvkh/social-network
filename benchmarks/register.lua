@@ -29,11 +29,10 @@ request = function()
     max_request = min_request + requests_per_thread - 1
     counter = min_request + request_id
     request_id = request_id + 1
-
     if counter > max_request then
         wrk.thread:stop()
     end
-
+    body = requests[counter]
     return wrk.format(
         wrk.method,
         wrk.path,

@@ -130,8 +130,8 @@ func makeRegisterForm(user User) string {
 }
 
 func makeSearchByNameForm(firstName string, lastName string) string {
-	firstNamePrefix := firstName[:1+rand.Intn(len(firstName)-1)]
-	lastNamePrefix := lastName[:1+rand.Intn(len(lastName)-1)]
+	firstNamePrefix := firstName[:rand.Intn(len(firstName)-1)]
+	lastNamePrefix := lastName[:rand.Intn(len(lastName)-1)]
 	form := url.Values{}
 	form.Set("first_name", firstNamePrefix)
 	form.Set("last_name", lastNamePrefix)
