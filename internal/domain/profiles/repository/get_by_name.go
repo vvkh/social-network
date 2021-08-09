@@ -8,10 +8,19 @@ import (
 )
 
 func (r *repo) GetByName(ctx context.Context, firstNamePrefix string, lastNamePrefix string) ([]entity.Profile, error) {
-	query := `SELECT * FROM profiles WHERE first_name LIKE ? AND last_name LIKE ?`
-
 	var profileDtos []dto.Profile
-	if err := r.db.SelectContext(ctx, &profileDtos, query, firstNamePrefix+"%", lastNamePrefix+"%"); err != nil {
+	var err error
+
+	// TODO: rewrite with squirrel
+	// TODO: add limit
+	if firstNamePrefix == "" {
+		query := `SELECT * FROM profiles WHERE last_name LIKE ?`
+		err = r.db.SelectContext(ctx, &profileDtos, query, lastNamePrefix+"%")
+	} else {
+		query := `SELECT * FROM profiles WHERE first_name LIKE ? AND last_name LIKE ?`
+		err = r.db.SelectContext(ctx, &profileDtos, query, firstNamePrefix+"%", lastNamePrefix+"%")
+	}
+	if err != nil {
 		return nil, err
 	}
 	return dto.ToProfiles(profileDtos), nil

@@ -1,0 +1,1 @@
+drop index if exists profile_last_name;
