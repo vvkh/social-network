@@ -57,8 +57,11 @@ gen-bench: build
 	./bin/gendata --names benchmarks/data/names.txt --output benchmarks/requests/register.txt --test-name register
 	./bin/gendata --names benchmarks/data/names.txt --output benchmarks/requests/search.txt --test-name search
 
+BENCH_N_CONN=50
+BENCH_DURATION=5m
+BENCH_TIMEOUT=1s
 bench-register:
-	wrk --latency -d 60s -t 6 -c 6 -s benchmarks/register.lua http://localhost
+	wrk --latency --timeout $(BENCH_TIMEOUT) -d $(BENCH_DURATION) -t 3 -c $(BENCH_N_CONN) -s benchmarks/register.lua http://localhost
 
 bench-search:
-	wrk --latency -d 5s -t 1 -c 1 -s benchmarks/search.lua http://localhost
+	wrk --latency --timeout $(BENCH_TIMEOUT) -d $(BENCH_DURATION) -t 3 -c $(BENCH_N_CONN) -s benchmarks/search.lua http://localhost
