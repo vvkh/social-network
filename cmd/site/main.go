@@ -54,7 +54,7 @@ func run() error {
 	profilesRepo := profilesRepository.New(appDB)
 	profilesUC := profilesUseCase.New(profilesRepo)
 
-	usersRepo := usersRepository.New(appDB)
+	usersRepo := usersRepository.New(appDB, appConfig.BcryptCost)
 	usersUC := usersUseCase.New(profilesUC, usersRepo, appConfig.AuthSecret)
 
 	friendshipRepo := friendshipRepository.New(appDB)

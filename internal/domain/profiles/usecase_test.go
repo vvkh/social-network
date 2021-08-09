@@ -33,7 +33,7 @@ func TestProfiles(t *testing.T) {
 
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	repo := usersRepository.New(appDB)
+	repo := usersRepository.New(appDB, conf.BcryptCost)
 	require.NoError(t, err)
 
 	uc := usersUseCase.New(profilesUC, repo, "secret")
@@ -89,7 +89,7 @@ func TestSearchProfiles(t *testing.T) {
 
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	repo := usersRepository.New(appDB)
+	repo := usersRepository.New(appDB, conf.BcryptCost)
 	require.NoError(t, err)
 
 	uc := usersUseCase.New(profilesUC, repo, "secret")

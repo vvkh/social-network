@@ -33,7 +33,7 @@ func TestAcceptFriendshipRequest(t *testing.T) {
 	profileRepo := profilesRepository.New(appDB)
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	usersRepo := usersRepository.New(appDB)
+	usersRepo := usersRepository.New(appDB, conf.BcryptCost)
 	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
 
 	repo := repository.New(appDB)
@@ -102,7 +102,7 @@ func TestDeclineFriendshipRequest(t *testing.T) {
 	profileRepo := profilesRepository.New(appDB)
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	usersRepo := usersRepository.New(appDB)
+	usersRepo := usersRepository.New(appDB, conf.BcryptCost)
 	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
 
 	repo := repository.New(appDB)
@@ -182,7 +182,7 @@ func TestStopFriendship(t *testing.T) {
 	profileRepo := profilesRepository.New(appDB)
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	usersRepo := usersRepository.New(appDB)
+	usersRepo := usersRepository.New(appDB, conf.BcryptCost)
 	usersUC := usersUseCase.New(profilesUC, usersRepo, "secret")
 
 	repo := repository.New(appDB)
@@ -238,7 +238,7 @@ func TestGetFriendshipStatus(t *testing.T) {
 	profileRepo := profilesRepository.New(appDB)
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	usersRepo := usersRepository.New(appDB)
+	usersRepo := usersRepository.New(appDB, conf.BcryptCost)
 	usersUC := usersUseCase.New(profilesUC, usersRepo, conf.AuthSecret)
 
 	repo := repository.New(appDB)

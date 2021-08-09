@@ -32,7 +32,7 @@ func TestCreateUserAndLogin(t *testing.T) {
 	profileRepo := profilesRepository.New(appDB)
 	profilesUC := profilesUseCase.New(profileRepo)
 
-	repo := repository.New(appDB)
+	repo := repository.New(appDB, conf.BcryptCost)
 	uc := usecase.New(profilesUC, repo, "secret")
 
 	ctx := context.Background()
