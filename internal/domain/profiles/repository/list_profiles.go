@@ -7,7 +7,7 @@ import (
 	"github.com/vvkh/social-network/internal/domain/profiles/repository/dto"
 )
 
-func (r *repo) ListProfiles(ctx context.Context, firstNamePrefix string, lastNamePrefix string) ([]entity.Profile, error) {
+func (r *repo) ListProfiles(ctx context.Context, firstNamePrefix string, lastNamePrefix string, limit int) ([]entity.Profile, error) {
 	var profileDtos []dto.Profile
 	var err error
 
