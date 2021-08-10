@@ -7,7 +7,7 @@ import (
 	"github.com/vvkh/social-network/internal/domain/profiles/repository/dto"
 )
 
-func (r *repo) ListProfiles(ctx context.Context, firstNamePrefix string, lastNamePrefix string, limit int) ([]entity.Profile, error) {
+func (r *repo) ListProfiles(ctx context.Context, firstNamePrefix string, lastNamePrefix string, limit int) ([]entity.Profile, bool, error) {
 	var profileDtos []dto.Profile
 	var err error
 
@@ -24,7 +24,7 @@ func (r *repo) ListProfiles(ctx context.Context, firstNamePrefix string, lastNam
 		err = r.db.SelectContext(ctx, &profileDtos, query, firstNamePrefix+"%", lastNamePrefix+"%")
 	}
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	return dto.ToProfiles(profileDtos), nil
+	return dto.ToProfiles(profileDtos), false, nil
 }

@@ -33,7 +33,7 @@ func Handle(log *zap.SugaredLogger, profilesUseCase profiles.UseCase, templates 
 			limit = defaultLimit
 		}
 
-		profiles, err := profilesUseCase.ListProfiles(request.Context(), firstNameFilter, lastNamePrefix, limit)
+		profiles, _, err := profilesUseCase.ListProfiles(request.Context(), firstNameFilter, lastNamePrefix, limit)
 
 		if err != nil {
 			log.Errorw("error while listing profiles", "err", err)

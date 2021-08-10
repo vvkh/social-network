@@ -168,7 +168,7 @@ func TestHandle(t *testing.T) {
 			log := zap.NewNop().Sugar()
 			ctrl := gomock.NewController(t)
 			profilesUseCase := mocks.NewMockUseCase(ctrl)
-			profilesUseCase.EXPECT().ListProfiles(gomock.Any(), test.mockWantIn.firstName, test.mockWantIn.lastName, test.mockWantIn.limit).Return(test.mockResponse, nil)
+			profilesUseCase.EXPECT().ListProfiles(gomock.Any(), test.mockWantIn.firstName, test.mockWantIn.lastName, test.mockWantIn.limit).Return(test.mockResponse, false, nil)
 			s := server.New(log, ":80", "../../../templates", nil, profilesUseCase, nil)
 			request := httptest.NewRequest("GET", test.url, nil)
 

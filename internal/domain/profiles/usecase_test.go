@@ -47,8 +47,9 @@ func TestProfiles(t *testing.T) {
 	require.NoError(t, err)
 	defer uc.DeleteUser(ctx, topsyID) //nolint:errcheck
 
-	profiles, err := profilesUC.ListProfiles(ctx, "", "", -1)
+	profiles, hasMore, err := profilesUC.ListProfiles(ctx, "", "", -1)
 	require.NoError(t, err)
+	require.False(t, hasMore)
 
 	wantJohnProfile := entity.Profile{
 		ID:        johnProfileID,
@@ -107,27 +108,33 @@ func TestSearchProfiles(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 1, len(johnProfile))
 
-	profiles, err := profilesUC.ListProfiles(ctx, "john", "doe", -1)
+	profiles, hasMore, err := profilesUC.ListProfiles(ctx, "john", "doe", -1)
 	require.NoError(t, err)
+	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
 
-	profiles, err = profilesUC.ListProfiles(ctx, "john", "", -1)
+	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "john", "", -1)
 	require.NoError(t, err)
+	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
 
-	profiles, err = profilesUC.ListProfiles(ctx, "", "doe", -1)
+	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "", "doe", -1)
 	require.NoError(t, err)
+	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
 
-	profiles, err = profilesUC.ListProfiles(ctx, "jo", "do", -1)
+	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "jo", "do", -1)
 	require.NoError(t, err)
+	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
 
-	profiles, err = profilesUC.ListProfiles(ctx, "jo", "", -1)
+	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "jo", "", -1)
 	require.NoError(t, err)
+	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
 
-	profiles, err = profilesUC.ListProfiles(ctx, "", "do", -1)
+	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "", "do", -1)
 	require.NoError(t, err)
+	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
 }

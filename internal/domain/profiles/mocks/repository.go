@@ -85,12 +85,13 @@ func (mr *MockRepositoryMockRecorder) GetByUserID(ctx, id interface{}) *gomock.C
 }
 
 // ListProfiles mocks base method
-func (m *MockRepository) ListProfiles(ctx context.Context, firstNamePrefix, lastNamePrefix string, limit int) ([]entity.Profile, error) {
+func (m *MockRepository) ListProfiles(ctx context.Context, firstNamePrefix, lastNamePrefix string, limit int) ([]entity.Profile, bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListProfiles", ctx, firstNamePrefix, lastNamePrefix, limit)
 	ret0, _ := ret[0].([]entity.Profile)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(bool)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // ListProfiles indicates an expected call of ListProfiles
