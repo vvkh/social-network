@@ -56,7 +56,7 @@ func TestHandle(t *testing.T) {
 			log := zap.NewNop().Sugar()
 			ctrl := gomock.NewController(t)
 			profilesUseCase := mocks.NewMockUseCase(ctrl)
-			profilesUseCase.EXPECT().ListProfiles(gomock.Any()).Return(test.mockResponse, nil)
+			profilesUseCase.EXPECT().ListProfiles(gomock.Any(), "", "").Return(test.mockResponse, nil)
 			s := server.New(log, ":80", "../../../templates", nil, profilesUseCase, nil)
 			request := httptest.NewRequest("GET", "/profiles/", nil)
 
@@ -181,7 +181,7 @@ func TestHandleSearchByName(t *testing.T) {
 			log := zap.NewNop().Sugar()
 			ctrl := gomock.NewController(t)
 			profilesUseCase := mocks.NewMockUseCase(ctrl)
-			profilesUseCase.EXPECT().GetByName(gomock.Any(), test.mockWantIn.firstName, test.mockWantIn.lastName).Return(test.mockResponse, nil)
+			profilesUseCase.EXPECT().ListProfiles(gomock.Any(), test.mockWantIn.firstName, test.mockWantIn.lastName).Return(test.mockResponse, nil)
 			s := server.New(log, ":80", "../../../templates", nil, profilesUseCase, nil)
 			request := httptest.NewRequest("GET", test.url, nil)
 

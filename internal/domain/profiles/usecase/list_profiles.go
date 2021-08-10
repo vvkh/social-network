@@ -6,6 +6,6 @@ import (
 	"github.com/vvkh/social-network/internal/domain/profiles/entity"
 )
 
-func (u *usecase) ListProfiles(ctx context.Context) ([]entity.Profile, error) {
-	return u.repository.ListProfiles(ctx)
+func (u *usecase) ListProfiles(ctx context.Context, firstNamePrefix string, lastNamePrefix string) ([]entity.Profile, error) {
+	return u.repository.ListProfiles(ctx, firstNamePrefix, lastNamePrefix)
 }

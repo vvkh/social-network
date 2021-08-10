@@ -84,32 +84,17 @@ func (mr *MockUseCaseMockRecorder) GetByUserID(ctx, id interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUserID", reflect.TypeOf((*MockUseCase)(nil).GetByUserID), ctx, id)
 }
 
-// GetByName mocks base method
-func (m *MockUseCase) GetByName(ctx context.Context, firstNamePrefix, lastNamePrefix string) ([]entity.Profile, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByName", ctx, firstNamePrefix, lastNamePrefix)
-	ret0, _ := ret[0].([]entity.Profile)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetByName indicates an expected call of GetByName
-func (mr *MockUseCaseMockRecorder) GetByName(ctx, firstNamePrefix, lastNamePrefix interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByName", reflect.TypeOf((*MockUseCase)(nil).GetByName), ctx, firstNamePrefix, lastNamePrefix)
-}
-
 // ListProfiles mocks base method
-func (m *MockUseCase) ListProfiles(ctx context.Context) ([]entity.Profile, error) {
+func (m *MockUseCase) ListProfiles(ctx context.Context, firstNamePrefix, lastNamePrefix string) ([]entity.Profile, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListProfiles", ctx)
+	ret := m.ctrl.Call(m, "ListProfiles", ctx, firstNamePrefix, lastNamePrefix)
 	ret0, _ := ret[0].([]entity.Profile)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListProfiles indicates an expected call of ListProfiles
-func (mr *MockUseCaseMockRecorder) ListProfiles(ctx interface{}) *gomock.Call {
+func (mr *MockUseCaseMockRecorder) ListProfiles(ctx, firstNamePrefix, lastNamePrefix interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProfiles", reflect.TypeOf((*MockUseCase)(nil).ListProfiles), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProfiles", reflect.TypeOf((*MockUseCase)(nil).ListProfiles), ctx, firstNamePrefix, lastNamePrefix)
 }
