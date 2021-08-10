@@ -39,11 +39,11 @@ func TestProfiles(t *testing.T) {
 	uc := usersUseCase.New(profilesUC, repo, "secret")
 
 	ctx := context.Background()
-	johnID, johnProfileID, err := uc.CreateUser(ctx, "johndoe_profiles", "123", "john", "doe", 18, "USA", "male", "")
+	johnID, johnProfileID, err := uc.CreateUser(ctx, "johndoe_profiles", "123", "john", "doe", 18, "", "male", "")
 	require.NoError(t, err)
 	defer uc.DeleteUser(ctx, johnID) //nolint:errcheck
 
-	topsyID, topsyProfileID, err := uc.CreateUser(ctx, "topsycret_profiles", "123", "topsy", "cret", 19, "USA", "male", "")
+	topsyID, topsyProfileID, err := uc.CreateUser(ctx, "topsycret_profiles", "123", "topsy", "cret", 19, "", "male", "")
 	require.NoError(t, err)
 	defer uc.DeleteUser(ctx, topsyID) //nolint:errcheck
 
@@ -96,11 +96,11 @@ func TestSearchProfiles(t *testing.T) {
 	uc := usersUseCase.New(profilesUC, repo, "secret")
 
 	ctx := context.Background()
-	johnID, johnProfileID, err := uc.CreateUser(ctx, "johndoe_profiles", "123", "john", "doe", 18, "USA", "male", "")
+	johnID, johnProfileID, err := uc.CreateUser(ctx, "johndoe_profiles", "123", "john", "doe", 18, "", "male", "")
 	require.NoError(t, err)
 	defer uc.DeleteUser(ctx, johnID) //nolint:errcheck
 
-	userID, _, err := uc.CreateUser(ctx, "topsycret_profiles", "123", "topsy", "cret", 18, "USA", "male", "")
+	userID, _, err := uc.CreateUser(ctx, "topsycret_profiles", "123", "topsy", "cret", 18, "", "male", "")
 	require.NoError(t, err)
 	defer uc.DeleteUser(ctx, userID) //nolint:errcheck
 
@@ -108,33 +108,82 @@ func TestSearchProfiles(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 1, len(johnProfile))
 
-	profiles, hasMore, err := profilesUC.ListProfiles(ctx, "john", "doe", -1)
+	profiles, _, err := profilesUC.ListProfiles(ctx, "john", "doe", -1)
 	require.NoError(t, err)
-	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
 
-	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "john", "", -1)
+	profiles, _, err = profilesUC.ListProfiles(ctx, "john", "", -1)
 	require.NoError(t, err)
-	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
 
-	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "", "doe", -1)
+	profiles, _, err = profilesUC.ListProfiles(ctx, "", "doe", -1)
 	require.NoError(t, err)
-	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
 
-	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "jo", "do", -1)
+	profiles, _, err = profilesUC.ListProfiles(ctx, "jo", "do", -1)
 	require.NoError(t, err)
-	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
 
-	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "jo", "", -1)
+	profiles, _, err = profilesUC.ListProfiles(ctx, "jo", "", -1)
 	require.NoError(t, err)
-	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
 
-	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "", "do", -1)
+	profiles, _, err = profilesUC.ListProfiles(ctx, "", "do", -1)
 	require.NoError(t, err)
-	require.False(t, hasMore)
 	require.Contains(t, profiles, johnProfile[0])
+}
+func TestSearchLimit(t *testing.T) {
+	if os.Getenv("SKIP_DB_TEST") == "1" {
+		t.SkipNow()
+	}
+	err := godotenv.Load("../../../.env")
+	require.NoError(t, err)
+
+	conf := config.NewFromEnv()
+	appDB, err := db.New(conf.DBUrl)
+	require.NoError(t, err)
+
+	profileRepo := profilesRepository.New(appDB)
+	require.NoError(t, err)
+
+	profilesUC := profilesUseCase.New(profileRepo)
+
+	repo := usersRepository.New(appDB, conf.BcryptCost)
+	require.NoError(t, err)
+
+	uc := usersUseCase.New(profilesUC, repo, "secret")
+
+	ctx := context.Background()
+	johnID, _, err := uc.CreateUser(ctx, "johndoe_profiles", "123", "john", "doe", 18, "", "male", "")
+	require.NoError(t, err)
+	defer uc.DeleteUser(ctx, johnID) //nolint:errcheck
+
+	userID, _, err := uc.CreateUser(ctx, "topsycret_profiles", "123", "topsy", "cret", 18, "", "male", "")
+	require.NoError(t, err)
+	defer uc.DeleteUser(ctx, userID) //nolint:errcheck
+
+	profiles, hasMore, err := profilesUC.ListProfiles(ctx, "", "", -1)
+	require.NoError(t, err)
+	require.Equal(t, 2, len(profiles))
+	require.False(t, hasMore)
+
+	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "", "", 1)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(profiles))
+	require.True(t, hasMore)
+
+	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "", "", 2)
+	require.NoError(t, err)
+	require.Equal(t, 2, len(profiles))
+	require.False(t, hasMore)
+
+	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "", "", 3)
+	require.NoError(t, err)
+	require.Equal(t, 2, len(profiles))
+	require.False(t, hasMore)
+
+	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "", "", 10)
+	require.NoError(t, err)
+	require.Equal(t, 2, len(profiles))
+	require.False(t, hasMore)
 }

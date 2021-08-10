@@ -3,6 +3,7 @@ module github.com/vvkh/social-network
 go 1.16
 
 require (
+	github.com/doug-martin/goqu/v9 v9.15.1
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-jwt/jwt v3.2.1+incompatible

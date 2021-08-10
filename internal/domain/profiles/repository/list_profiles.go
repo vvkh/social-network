@@ -3,28 +3,56 @@ package repository
 import (
 	"context"
 
+	"github.com/doug-martin/goqu/v9"
+
+	"github.com/vvkh/social-network/internal/domain/profiles"
 	"github.com/vvkh/social-network/internal/domain/profiles/entity"
 	"github.com/vvkh/social-network/internal/domain/profiles/repository/dto"
 )
 
-func (r *repo) ListProfiles(ctx context.Context, firstNamePrefix string, lastNamePrefix string, limit int) ([]entity.Profile, bool, error) {
-	var profileDtos []dto.Profile
-	var err error
+var query = goqu.Dialect("mysql").From(`profiles`).Select("*")
 
-	// TODO: rewrite with squirrel
-	// TODO: add limit
-	if firstNamePrefix == "" && lastNamePrefix == "" {
-		query := `SELECT * FROM profiles`
-		err = r.db.SelectContext(ctx, &profileDtos, query)
-	} else if firstNamePrefix == "" {
-		query := `SELECT * FROM profiles WHERE last_name LIKE ?`
-		err = r.db.SelectContext(ctx, &profileDtos, query, lastNamePrefix+"%")
-	} else {
-		query := `SELECT * FROM profiles WHERE first_name LIKE ? AND last_name LIKE ?`
-		err = r.db.SelectContext(ctx, &profileDtos, query, firstNamePrefix+"%", lastNamePrefix+"%")
+func (r *repo) ListProfiles(ctx context.Context, firstNamePrefix string, lastNamePrefix string, limit int) ([]entity.Profile, bool, error) {
+	if lastNamePrefix != "" {
+		query = query.Where(goqu.Ex{
+			"last_name": goqu.Op{
+				"LIKE": lastNamePrefix + "%",
+			},
+		})
 	}
+
+	if firstNamePrefix != "" {
+		query = query.Where(goqu.Ex{
+			"first_name": goqu.Op{
+				"LIKE": firstNamePrefix + "%",
+			},
+		})
+	}
+
+	appliedLimit := false
+	if limit != profiles.ShowAllProfiles {
+		appliedLimit = true
+		// we request "limit" + 1 so that later we would know if there are more profiles to show
+		// if number greater than "limit" returned then we have at least one more profile
+		query = query.Limit(uint(limit) + 1)
+	}
+
+	sql, args, err := query.ToSQL()
 	if err != nil {
 		return nil, false, err
 	}
-	return dto.ToProfiles(profileDtos), false, nil
+
+	var profileDtos []dto.Profile
+	if err = r.db.SelectContext(ctx, &profileDtos, sql, args...); err != nil {
+		return nil, false, err
+	}
+
+	var hasMore bool
+	if appliedLimit && len(profileDtos) > limit {
+		profileDtos = profileDtos[:limit]
+		hasMore = true
+	} else {
+		hasMore = false
+	}
+	return dto.ToProfiles(profileDtos), hasMore, nil
 }

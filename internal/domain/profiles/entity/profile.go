@@ -7,6 +7,7 @@ type Profile struct {
 	LastName  string
 	Age       uint8
 	Sex       Sex
-	About     string
-	Location  string
+
+	About    string
+	Location string
 }

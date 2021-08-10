@@ -29,6 +29,7 @@ func (u *usecase) CreateProfile(ctx context.Context, userID uint64, firstName st
 		About:     about,
 		Location:  location,
 	}
+
 	id, err := u.repository.CreateProfile(ctx, profile)
 	if err != nil {
 		return entity.Profile{}, fmt.Errorf("repository.CreateProfile error: %w", err)
