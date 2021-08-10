@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	defaultLimit = 10
+	defaultLimit      = 10
+	showMoreLimitStep = 10
 )
 
 func Handle(log *zap.SugaredLogger, profilesUseCase profiles.UseCase, templates *templates.Templates) http.HandlerFunc {
@@ -33,13 +34,18 @@ func Handle(log *zap.SugaredLogger, profilesUseCase profiles.UseCase, templates 
 			limit = defaultLimit
 		}
 
-		profiles, _, err := profilesUseCase.ListProfiles(request.Context(), firstNameFilter, lastNamePrefix, limit)
+		profiles, hasMore, err := profilesUseCase.ListProfiles(request.Context(), firstNameFilter, lastNamePrefix, limit)
 
 		if err != nil {
 			log.Errorw("error while listing profiles", "err", err)
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		var nextLimit *ShowMoreLimit
+		if hasMore {
+			nextLimit = &ShowMoreLimit{NextLimit: limit + showMoreLimitStep}
+		}
+
 		context := Context{
 			Self:     dtoFromModel(self),
 			Profiles: dtoFromModels(profiles),
@@ -47,6 +53,7 @@ func Handle(log *zap.SugaredLogger, profilesUseCase profiles.UseCase, templates 
 				FirstName: firstNameFilter,
 				LastName:  lastNamePrefix,
 			},
+			DisplayShowMore: nextLimit,
 		}
 
 		err = render(writer, context)

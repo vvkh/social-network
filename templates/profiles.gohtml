@@ -16,5 +16,13 @@
             <a href="{{ printf "/profiles/%d/" .ID }}">{{ .FirstName }} {{ .LastName }}</a>
         </li>
     {{ end }}
+    {{ if .DisplayShowMore }}
+        <form method="GET">
+            <input hidden id="show_more_first_name" name="first_name" type="text" value="{{ .Filters.FirstName }}" />
+            <input hidden id="show_more_last_name" name="last_name" type="text" value="{{ .Filters.LastName }}" />
+            <input hidden id="show_more_limit" name="limit" type="text" value="{{ .DisplayShowMore.NextLimit }}" />
+            <input type="submit" value="show more"/>
+        </form>
+    {{ end }}
     </ul>
 {{ end }}

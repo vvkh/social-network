@@ -22,11 +22,15 @@ func TestHandle(t *testing.T) {
 		lastName  string
 		limit     int
 	}
+	type mockOut struct {
+		profiles []entity.Profile
+		hasMore  bool
+	}
 	tests := []struct {
 		name         string
 		url          string
 		mockWantIn   mockIn
-		mockResponse []entity.Profile
+		mockResponse mockOut
 		wantBody     []string
 	}{
 		{
@@ -35,16 +39,18 @@ func TestHandle(t *testing.T) {
 			mockWantIn: mockIn{
 				limit: 10,
 			},
-			mockResponse: []entity.Profile{
-				{
-					ID:        2,
-					FirstName: "John",
-					LastName:  "Doe",
-				},
-				{
-					ID:        3,
-					FirstName: "Topsy",
-					LastName:  "Cret",
+			mockResponse: mockOut{
+				profiles: []entity.Profile{
+					{
+						ID:        2,
+						FirstName: "John",
+						LastName:  "Doe",
+					},
+					{
+						ID:        3,
+						FirstName: "Topsy",
+						LastName:  "Cret",
+					},
 				},
 			},
 			wantBody: []string{
@@ -58,7 +64,9 @@ func TestHandle(t *testing.T) {
 			mockWantIn: mockIn{
 				limit: 10,
 			},
-			mockResponse: []entity.Profile{},
+			mockResponse: mockOut{
+				profiles: []entity.Profile{},
+			},
 			wantBody: []string{
 				`<input id="first_name" name="first_name" type="text" placeholder="John" value="" />`,
 				`<input id="last_name" name="last_name" type="text" placeholder="Doe" value="" />`,
@@ -70,10 +78,31 @@ func TestHandle(t *testing.T) {
 			mockWantIn: mockIn{
 				limit: 20,
 			},
-			mockResponse: []entity.Profile{},
+			mockResponse: mockOut{
+				profiles: []entity.Profile{},
+			},
+		},
+		{
+			name: "there_is_show_more_link_if_has_more",
+			url:  "/profiles/?limit=1",
+			mockWantIn: mockIn{
+				limit: 1,
+			},
+			mockResponse: mockOut{
+				profiles: []entity.Profile{
+					{
+						ID:        2,
+						FirstName: "John",
+						LastName:  "Doe",
+					},
+				},
+				hasMore: true,
+			},
 			wantBody: []string{
-				`<input id="first_name" name="first_name" type="text" placeholder="John" value="" />`,
-				`<input id="last_name" name="last_name" type="text" placeholder="Doe" value="" />`,
+				`<input hidden id="show_more_first_name" name="first_name" type="text" value="" />`,
+				`<input hidden id="show_more_last_name" name="last_name" type="text" value="" />`,
+				`<input hidden id="show_more_limit" name="limit" type="text" value="11" />`,
+				`<input type="submit" value="show more"/>`,
 			},
 		},
 		{
@@ -84,16 +113,18 @@ func TestHandle(t *testing.T) {
 				lastName:  "doe",
 				limit:     10,
 			},
-			mockResponse: []entity.Profile{
-				{
-					ID:        2,
-					FirstName: "John",
-					LastName:  "Doe",
-				},
-				{
-					ID:        3,
-					FirstName: "Johny",
-					LastName:  "Doewan",
+			mockResponse: mockOut{
+				profiles: []entity.Profile{
+					{
+						ID:        2,
+						FirstName: "John",
+						LastName:  "Doe",
+					},
+					{
+						ID:        3,
+						FirstName: "Johny",
+						LastName:  "Doewan",
+					},
 				},
 			},
 			wantBody: []string{
@@ -108,16 +139,18 @@ func TestHandle(t *testing.T) {
 				firstName: "john",
 				limit:     10,
 			},
-			mockResponse: []entity.Profile{
-				{
-					ID:        2,
-					FirstName: "John",
-					LastName:  "Doe",
-				},
-				{
-					ID:        3,
-					FirstName: "Johny",
-					LastName:  "Doewan",
+			mockResponse: mockOut{
+				profiles: []entity.Profile{
+					{
+						ID:        2,
+						FirstName: "John",
+						LastName:  "Doe",
+					},
+					{
+						ID:        3,
+						FirstName: "Johny",
+						LastName:  "Doewan",
+					},
 				},
 			},
 			wantBody: []string{
@@ -132,16 +165,18 @@ func TestHandle(t *testing.T) {
 				lastName: "doe",
 				limit:    10,
 			},
-			mockResponse: []entity.Profile{
-				{
-					ID:        2,
-					FirstName: "John",
-					LastName:  "Doe",
-				},
-				{
-					ID:        3,
-					FirstName: "Johny",
-					LastName:  "Doewan",
+			mockResponse: mockOut{
+				profiles: []entity.Profile{
+					{
+						ID:        2,
+						FirstName: "John",
+						LastName:  "Doe",
+					},
+					{
+						ID:        3,
+						FirstName: "Johny",
+						LastName:  "Doewan",
+					},
 				},
 			},
 			wantBody: []string{
@@ -168,7 +203,7 @@ func TestHandle(t *testing.T) {
 			log := zap.NewNop().Sugar()
 			ctrl := gomock.NewController(t)
 			profilesUseCase := mocks.NewMockUseCase(ctrl)
-			profilesUseCase.EXPECT().ListProfiles(gomock.Any(), test.mockWantIn.firstName, test.mockWantIn.lastName, test.mockWantIn.limit).Return(test.mockResponse, false, nil)
+			profilesUseCase.EXPECT().ListProfiles(gomock.Any(), test.mockWantIn.firstName, test.mockWantIn.lastName, test.mockWantIn.limit).Return(test.mockResponse.profiles, test.mockResponse.hasMore, nil)
 			s := server.New(log, ":80", "../../../templates", nil, profilesUseCase, nil)
 			request := httptest.NewRequest("GET", test.url, nil)
 

@@ -14,10 +14,14 @@ type Filters struct {
 	LastName  string
 }
 
+type ShowMoreLimit struct {
+	NextLimit int
+}
 type Context struct {
-	Self     Dto
-	Profiles []Dto
-	Filters  Filters
+	Self            Dto
+	Profiles        []Dto
+	Filters         Filters
+	DisplayShowMore *ShowMoreLimit
 }
 
 func dtoFromModel(profile entity.Profile) Dto {
