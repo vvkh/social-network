@@ -72,6 +72,18 @@ func TestProfiles(t *testing.T) {
 	}
 	require.Contains(t, profiles, wantJohnProfile)
 	require.Contains(t, profiles, wantTopsyProfile)
+
+	johnIndex := 0
+	topsyIndex := 0
+	for i, profile := range profiles {
+		if profile == wantTopsyProfile {
+			topsyIndex = i
+		}
+		if profile == wantJohnProfile {
+			johnIndex = i
+		}
+	}
+	require.Equal(t, johnIndex < topsyIndex, johnProfileID < topsyProfileID)
 }
 
 func TestSearchProfiles(t *testing.T) {
