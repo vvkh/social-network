@@ -11,7 +11,7 @@ import (
 )
 
 func (r *repo) ListProfiles(ctx context.Context, firstNamePrefix string, lastNamePrefix string, limit int) ([]entity.Profile, bool, error) {
-	var query = goqu.Dialect("mysql").From(`profiles`).Select("*")
+	var query = goqu.Dialect("mysql").From(`profiles`).Select("*").Order(goqu.I("id").Asc())
 
 	if lastNamePrefix != "" {
 		query = query.Where(goqu.Ex{
