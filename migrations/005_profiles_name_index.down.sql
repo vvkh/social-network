@@ -1,0 +1,1 @@
+drop index profile_names on profiles;

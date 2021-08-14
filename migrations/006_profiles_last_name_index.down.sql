@@ -1,0 +1,1 @@
+drop index profile_last_names on profiles;

@@ -7,7 +7,7 @@ import (
 )
 
 func (r *repo) CreateUser(ctx context.Context, username string, password string) (uint64, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), r.bcryptCost)
 	if err != nil {
 		return 0, err
 	}

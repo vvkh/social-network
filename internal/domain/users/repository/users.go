@@ -6,11 +6,13 @@ import (
 )
 
 type repo struct {
-	db *sqlx.DB
+	db         *sqlx.DB
+	bcryptCost int
 }
 
-func New(db *sqlx.DB) *repo {
+func New(db *sqlx.DB, bcryptCost int) *repo {
 	return &repo{
-		db: db,
+		db:         db,
+		bcryptCost: bcryptCost,
 	}
 }

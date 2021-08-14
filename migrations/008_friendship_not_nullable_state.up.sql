@@ -1,0 +1,1 @@
+alter table friendship modify state enum("created", "accepted", "declined") default "created" not null;

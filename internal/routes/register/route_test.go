@@ -56,35 +56,6 @@ func TestHandlePost(t *testing.T) {
 		wantHeaders       map[string]string
 		wantBody          string
 	}{
-		//{
-		//	name:              "error_shown_if_register_failed_dut_to_empty_credentials",
-		//	mockWantIn:        &registerArgs{},
-		//	mockResponseError: users.EmptyCredentials,
-		//	wantStatus:        http.StatusBadRequest,
-		//	wantBody:          "both password and username are required",
-		//},
-		//{
-		//	name: "error_shown_if_login_failed_dut_to_bad_credentials",
-		//	form: "username=foo&password=bar",
-		//	mockWantIn: &registerArgs{
-		//		username: "foo",
-		//		password: "bar",
-		//	},
-		//	mockResponseError: users.AuthenticationFailed,
-		//	wantStatus:        http.StatusForbidden,
-		//	wantBody:          "authentication failed",
-		//},
-		//{
-		//	name: "error_shown_if_login_failed_due_to_other_error",
-		//	form: "username=foo&password=bar",
-		//	mockWantIn: &registerArgs{
-		//		username: "foo",
-		//		password: "bar",
-		//	},
-		//	mockResponseError: errors.New("some error"),
-		//	wantStatus:        http.StatusInternalServerError,
-		//	wantBody:          "server failed",
-		//},
 		{
 			name: "redirects_to_index_if_successful",
 			form: "username=foo&password=bar&first_name=John&last_name=Doe&age=30&location=USA&sex=male&about=something",

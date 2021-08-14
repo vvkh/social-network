@@ -1,0 +1,1 @@
+create index profile_last_names on profiles(last_name, first_name);

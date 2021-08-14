@@ -36,3 +36,4 @@ Run `cmd/main.go`, environment variables would load automatically.
 | TEMPLATES_DIR | path to directory with templates| `./templates` | 
 | AUTH_SECRET | password for JWT | `secret` | 
 | DB_URL | mysql connection url | `user:password@tcp(localhost:3306)/social_network` |
+| BCRYPT_COST | cost of hasing used in bcrypt | `10` |

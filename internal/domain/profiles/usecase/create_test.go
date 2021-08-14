@@ -17,8 +17,8 @@ func Test_usecase_CreateProfile(t *testing.T) {
 		firstName string
 		lastName  string
 		age       uint8
-		location  string
 		sex       string
+		location  string
 		about     string
 	}
 	tests := []struct {
@@ -97,8 +97,6 @@ func Test_usecase_CreateProfile(t *testing.T) {
 				LastName:  "Doe",
 				Age:       16,
 				Sex:       "female",
-				About:     "",
-				Location:  "",
 			},
 		},
 		{
@@ -119,8 +117,6 @@ func Test_usecase_CreateProfile(t *testing.T) {
 				LastName:  "Doe",
 				Age:       16,
 				Sex:       "male",
-				About:     "",
-				Location:  "",
 			},
 		},
 	}

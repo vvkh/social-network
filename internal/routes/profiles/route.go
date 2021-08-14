@@ -2,13 +2,18 @@ package profiles
 
 import (
 	"net/http"
+	"strconv"
 
 	"go.uber.org/zap"
 
 	"github.com/vvkh/social-network/internal/domain/profiles"
-	"github.com/vvkh/social-network/internal/domain/profiles/entity"
 	"github.com/vvkh/social-network/internal/middlewares"
 	"github.com/vvkh/social-network/internal/templates"
+)
+
+const (
+	defaultLimit      = 10
+	showMoreLimitStep = 10
 )
 
 func Handle(log *zap.SugaredLogger, profilesUseCase profiles.UseCase, templates *templates.Templates) http.HandlerFunc {
@@ -24,21 +29,23 @@ func Handle(log *zap.SugaredLogger, profilesUseCase profiles.UseCase, templates 
 
 		firstNameFilter := request.Form.Get("first_name")
 		lastNamePrefix := request.Form.Get("last_name")
-
-		var profiles []entity.Profile
-		var err error
-
-		if firstNameFilter == "" && lastNamePrefix == "" {
-			profiles, err = profilesUseCase.ListProfiles(request.Context())
-		} else {
-			profiles, err = profilesUseCase.GetByName(request.Context(), firstNameFilter, lastNamePrefix)
+		limit, err := strconv.Atoi(request.Form.Get("limit"))
+		if err != nil {
+			limit = defaultLimit
 		}
+
+		profiles, hasMore, err := profilesUseCase.ListProfiles(request.Context(), firstNameFilter, lastNamePrefix, limit)
 
 		if err != nil {
 			log.Errorw("error while listing profiles", "err", err)
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		var nextLimit *ShowMoreLimit
+		if hasMore {
+			nextLimit = &ShowMoreLimit{NextLimit: limit + showMoreLimitStep}
+		}
+
 		context := Context{
 			Self:     dtoFromModel(self),
 			Profiles: dtoFromModels(profiles),
@@ -46,6 +53,7 @@ func Handle(log *zap.SugaredLogger, profilesUseCase profiles.UseCase, templates 
 				FirstName: firstNameFilter,
 				LastName:  lastNamePrefix,
 			},
+			DisplayShowMore: nextLimit,
 		}
 
 		err = render(writer, context)
