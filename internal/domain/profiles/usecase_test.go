@@ -39,11 +39,11 @@ func TestProfiles(t *testing.T) {
 	uc := usersUseCase.New(profilesUC, repo, "secret")
 
 	ctx := context.Background()
-	johnID, johnProfileID, err := uc.CreateUser(ctx, "johndoe_profiles", "123", "john", "doe", 18, "", "male", "")
+	johnID, johnProfileID, err := uc.CreateUser(ctx, "johndoe_profiles", "123", "john", "doe", 18, "USA", "male", "")
 	require.NoError(t, err)
 	defer uc.DeleteUser(ctx, johnID) //nolint:errcheck
 
-	topsyID, topsyProfileID, err := uc.CreateUser(ctx, "topsycret_profiles", "123", "topsy", "cret", 19, "", "male", "")
+	topsyID, topsyProfileID, err := uc.CreateUser(ctx, "topsycret_profiles", "123", "topsy", "cret", 19, "USA", "male", "")
 	require.NoError(t, err)
 	defer uc.DeleteUser(ctx, topsyID) //nolint:errcheck
 
