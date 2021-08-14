@@ -1,5 +1,11 @@
 # Adding index for searching profiles by name
 
+All tests were performed on the following specs
+
+| cpu | ram | storage | os | docker | 
+| --- | --- | --- | --- | --- | 
+| i7-9750H | 32GB | 512GB SSD | macOS 11.5 | 3.5.2 |
+
 ## Baseline
 
 ### Generate requests for load testing
@@ -58,25 +64,23 @@ make up
 Run `/register/` benchmark.
 ```
 > make REGISTER_N_CONN=50 bench-register
-```
-Results:
-```
-> wrk --latency --timeout 1s -d 5m -t 3 -c 50 -s benchmarks/register.lua http://localhost
+
+wrk --latency --timeout 1s -d 5m -t 3 -c 50 -s benchmarks/register.lua http://localhost
 
 Running 5m test @ http://localhost
   3 threads and 50 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   377.57ms   87.84ms 974.41ms   72.18%
-    Req/Sec    42.82     22.49   161.00     60.82%
+    Latency   450.63ms   97.74ms 989.36ms   71.23%
+    Req/Sec    36.09     20.04   140.00     68.83%
   Latency Distribution
-     50%  371.36ms
-     75%  427.96ms
-     90%  487.13ms
-     99%  623.24ms
-  38185 requests in 5.00m, 3.53MB read
-  Socket errors: connect 0, read 0, write 0, timeout 49
-Requests/sec:    127.26
-Transfer/sec:     12.05KB
+     50%  446.89ms
+     75%  509.99ms
+     90%  573.48ms
+     99%  703.88ms
+  31913 requests in 5.00m, 2.95MB read
+  Socket errors: connect 0, read 0, write 0, timeout 96
+Requests/sec:    106.34
+Transfer/sec:     10.07KB
 ```
 
 ### `/profiles/` performance
@@ -96,23 +100,23 @@ As a result, there are 980K users in the database.
 Now run benchmark for `/profiles/` page.
 ```
 > make BENCH_DURATION=5m BENCH_N_CONN=50 BENCH_TIMEOUT=10s bench-search
+
 wrk --latency --timeout 10s -d 5m -t 3 -c 50 -s benchmarks/search.lua http://localhost
 
 Running 5m test @ http://localhost
   3 threads and 50 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     7.29s     2.41s   10.00s    84.00%
-    Req/Sec     3.91     11.15   282.00     97.46%
+    Latency     3.12s     2.87s    8.07s    34.93%
+    Req/Sec    11.34     14.84   250.00     87.89%
   Latency Distribution
-     50%    7.91s
-     75%    8.73s
-     90%    9.45s
-     99%    9.95s
-  1496 requests in 5.00m, 2.61GB read
-  Socket errors: connect 0, read 0, write 0, timeout 496
+     50%    3.59s
+     75%    6.27s
+     90%    7.06s
+     99%    7.72s
+  5042 requests in 5.00m, 10.20MB read
   Non-2xx or 3xx responses: 48
-Requests/sec:      4.98
-Transfer/sec:      8.89MB
+Requests/sec:     16.80
+Transfer/sec:     34.81KB
 ```
 
 ## Profiles index
@@ -165,7 +169,7 @@ Add last name index to address the issue.
 ```
 > cat migrations/006_profiles_last_name_index.up.sql
 
-create index profile_last_name on profiles(last_name);
+create index profile_last_names on profiles(last_name, first_name);
 ```
 
 Migrate db.
@@ -181,32 +185,52 @@ Query plan for last name only filter.
     -> Index range scan on profiles using profile_last_name, with index condition: (`profiles`.last_name like 'Lep%')  (cost=441.26 rows=980)
 ```
 
-Now index scan is used, but there is a useless first_name filter. Rewrite backend to produce following query for last-name only search
-```
-> EXPLAIN FORMAT = tree SELECT * FROM profiles WHERE last_name LIKE "Lep%"
-
--> Index range scan on profiles using profile_last_name, with index condition: (`profiles`.last_name like 'Lep%')  (cost=441.26 rows=980)
-```
-
 Run benchmarks again:
 ```
 > make BENCH_DURATION=5m BENCH_N_CONN=50 BENCH_TIMEOUT=10s bench-search
 
+wrk --latency --timeout 10s -d 5m -t 3 -c 50 -s benchmarks/search.lua http://localhost
 Running 5m test @ http://localhost
   3 threads and 50 connections
-user wrk created
-authenticated wrk with cookie 	token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mjg1OTUxMTcsInByb2ZpbGUiOjExNDg3MzAsInN1YiI6MTE0OTk3Mn0.EkqiRJJSd5N_sfE-aZw9ZXVW5MNvLSg2U8dsbcT_emY; Path=/; HttpOnly	 status 	302
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   865.99ms    1.49s   10.00s    93.07%
-    Req/Sec     8.49     10.94   254.00     89.53%
+    Latency   153.98ms  237.47ms   1.78s    85.71%
+    Req/Sec   336.58    123.49     1.12k    77.27%
   Latency Distribution
-     50%  453.15ms
-     75%  677.75ms
-     90%    1.45s
-     99%    8.63s
-  4879 requests in 5.00m, 6.84GB read
-  Socket errors: connect 0, read 0, write 0, timeout 179
+     50%   47.36ms
+     75%  129.34ms
+     90%  519.08ms
+     99%    1.06s
+  220149 requests in 5.00m, 469.12MB read
   Non-2xx or 3xx responses: 48
-Requests/sec:     16.26
-Transfer/sec:     23.36MB
+Requests/sec:    733.56
+Transfer/sec:      1.56MB
 ```
+
+Recheck register performance after adding index
+```
+> make REGISTER_N_CONN=50 bench-register
+
+wrk --latency --timeout 1s -d 5m -t 3 -c 50 -s benchmarks/register.lua http://localhost
+Running 5m test @ http://localhost
+  3 threads and 50 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   463.00ms  107.32ms 998.83ms   71.05%
+    Req/Sec    35.10     20.05   151.00     69.25%
+  Latency Distribution
+     50%  459.08ms
+     75%  527.42ms
+     90%  596.87ms
+     99%  745.55ms
+  30767 requests in 5.00m, 2.85MB read
+  Socket errors: connect 0, read 0, write 0, timeout 246
+Requests/sec:    102.53
+Transfer/sec:      9.71KB
+```
+
+## Final results
+Test results show that adding index significantly increased search performance while not affecting register performance that much.
+
+| Test | Search, Latency 90% | Search, Throughput | Register, Latency 90% | Register, Throughput |
+| --- | --- | --- | --- | --- |
+| Baseline | ~7 s | ~17 rps | ~600 ms | ~100 rps | 
+| With index | ~500 ms | ~733 rps |  ~600ms |   ~100 rps |

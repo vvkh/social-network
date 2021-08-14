@@ -1,1 +1,1 @@
-drop index if exists profile_names;
+drop index profile_names on profiles;
