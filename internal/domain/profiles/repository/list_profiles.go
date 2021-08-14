@@ -10,13 +10,13 @@ import (
 	"github.com/vvkh/social-network/internal/domain/profiles/repository/dto"
 )
 
-var query = goqu.Dialect("mysql").From(`profiles`).Select("*")
-
 func (r *repo) ListProfiles(ctx context.Context, firstNamePrefix string, lastNamePrefix string, limit int) ([]entity.Profile, bool, error) {
+	var query = goqu.Dialect("mysql").From(`profiles`).Select("*")
+
 	if lastNamePrefix != "" {
 		query = query.Where(goqu.Ex{
 			"last_name": goqu.Op{
-				"LIKE": lastNamePrefix + "%",
+				"ILIKE": lastNamePrefix + "%",
 			},
 		})
 	}
@@ -24,7 +24,7 @@ func (r *repo) ListProfiles(ctx context.Context, firstNamePrefix string, lastNam
 	if firstNamePrefix != "" {
 		query = query.Where(goqu.Ex{
 			"first_name": goqu.Op{
-				"LIKE": firstNamePrefix + "%",
+				"ILIKE": firstNamePrefix + "%",
 			},
 		})
 	}
