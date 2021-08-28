@@ -50,7 +50,7 @@ response = function(status, headers, body)
     end
     counter = counter + 1
     if counter >= #requests then
-        counter = 0
+        counter = 1
     end
     queryParams = requests[counter]
     wrk.path = "/profiles/?" .. queryParams
