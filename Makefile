@@ -4,6 +4,7 @@ install: deps tools
 env:
 	make db
 	sleep 30
+	make db-proxy
 	make migrate
 
 stop-env:
@@ -49,6 +50,9 @@ build:
 db:
 	docker-compose down
 	docker-compose up -d db
+
+db-proxy:
+	docker-compose up -d db_proxy db_proxy_init
 
 migrate:
 	docker-compose up migrate
