@@ -10,20 +10,22 @@ services:
     image: proxysql/proxysql
     depends_on:
       - db
+      - db_proxy_init
     ports:
     - 6032:6032
     - 6033:6033
+    entrypoint: proxysql -f -c /etc/proxysql/proxysql.cnf
     volumes:
-    - ./conf/proxysql.cnf:/etc/proxysql.cnf
+    - proxysqlcnf:/etc/proxysql
 
   db_proxy_init:
-    build:
-      context: .
-      dockerfile: proxysql_init.Dockerfile
-    depends_on:
-      - db_proxy
+    image: hairyhenderson/gomplate
+    volumes:
+    - ./conf/proxysql.cnf.templ:/proxysql/cnf.templ
+    - proxysqlcnf:/proxysql
     env_file:
       - .env
+    command: -f /proxysql/cnf.templ -o /proxysql/proxysql.cnf
 
   migrate:
     build:
@@ -36,15 +38,18 @@ services:
     env_file:
     - .env
     environment:
-      DB_URL: $MYSQL_USER:$MYSQL_PASSWORD@tcp(db:3306)/$MYSQL_DATABASE
+      DB_URL: $MYSQL_USER:$MYSQL_PASSWORD@tcp(db_proxy:$PROXY_USER_PORT)/$MYSQL_DATABASE
 
   service:
     build:
       context: .
       dockerfile: service.Dockerfile
     depends_on:
-      - db
+      - db_proxy
     env_file:
       - .env
     ports:
     - 80:80
+
+volumes:
+  proxysqlcnf:
