@@ -1,10 +1,49 @@
 version: '3.8'
+
 services:
   db:
+    depends_on:
+      - db_init
     image: mysql:8
     env_file:
     - .env
     command: --default-authentication-plugin=mysql_native_password
+    volumes:
+    - ./conf/mysql/main:/etc/mysql/conf.d
+    - db_init:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
+
+  db_init:
+    image: hairyhenderson/gomplate
+    volumes:
+      - ./scripts/mysql/init_main.sql.templ:/start.sql.templ
+      - db_init:/mysql
+    env_file:
+      - .env
+    command: -f /start.sql.templ -o /mysql/start.sql
+
+  db_replica:
+    depends_on:
+      - db_replica_init
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./conf/mysql/replica:/etc/mysql/conf.d
+      - db_replica_init:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    ports:
+      - 3307:3306
+
+  db_replica_init:
+    image: hairyhenderson/gomplate
+    volumes:
+      - ./scripts/mysql/init_replica.sql.templ:/start.sql.templ
+      - db_replica_init:/mysql
+    env_file:
+      - .env
+    command: -f /start.sql.templ -o /mysql/start.sql
 
   db_proxy:
     image: proxysql/proxysql
@@ -53,3 +92,5 @@ services:
 
 volumes:
   proxysqlcnf:
+  db_init:
+  db_replica_init:

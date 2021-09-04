@@ -190,7 +190,7 @@ func TestSearchLimit(t *testing.T) {
 
 	profiles, _, err = profilesUC.ListProfiles(ctx, "", "", 3)
 	require.NoError(t, err)
-	require.Equal(t, 2, len(profiles))
+	require.GreaterOrEqual(t, len(profiles), 2)
 
 	profiles, hasMore, err = profilesUC.ListProfiles(ctx, "", "", 10)
 	require.NoError(t, err)

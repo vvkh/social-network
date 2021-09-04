@@ -49,10 +49,10 @@ build:
 
 db:
 	docker-compose down
-	docker-compose up -d db
+	docker-compose up -d db db_replica
 
 db-proxy:
-	docker-compose up -d db_proxy db_proxy_init
+	docker-compose up -d db_proxy
 
 migrate:
 	docker-compose up migrate
