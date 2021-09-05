@@ -117,7 +117,7 @@ Running 5m test @ http://localhost
 Requests/sec:    319.54
 Transfer/sec:     30.27KB
 ```
-So async replication didn't have any significant impact on write performance.
+So async replication did affect write performance quite a bit — it went down to 320 RPS from inital 400 RPS.
 
 ### Resources usage while reading
 ```
@@ -146,3 +146,112 @@ Requests/sec:    248.71
 Transfer/sec:    511.04KB
 ```
 Read performance was roughly the same as well but with way less load on main db instance.
+
+## Semi-sync replication
+Semi-sync replication was configured with following config on the main instance:
+```
+[mysqld]
+server-id=1
+binlog_format=ROW
+log-bin
+gtid_mode=ON
+enforce_gtid_consistency=ON
+rpl_semi_sync_master_enabled=ON
+rpl_semi_sync_master_timeout=1000
+```
+
+And following config for replica instance:
+```
+[mysqld]
+server-id=2
+rpl_semi_sync_slave_enabled=1
+gtid_mode=ON
+enforce_gtid_consistency=ON
+```
+
+### Resources usage while idle
+```
+CONTAINER ID   NAME                            CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O        PIDS
+7840087dffad   social-network_db_proxy_1       1.14%     17.91MiB / 1.939GiB   0.90%     49.7kB / 59.3kB   72.6MB / 381kB   19
+51d8b693bab6   social-network_db_1             0.69%     357.1MiB / 1.939GiB   17.99%    53.4kB / 6.46MB   25.5MB / 281MB   42
+136ce0c99645   social-network_db_replica_1     0.65%     378MiB / 1.939GiB     19.04%    3.24MB / 29.9kB   30.6MB / 327MB   41
+f3f9b3c436ac   social-network_db_replica_2_1   0.55%     386.8MiB / 1.939GiB   19.48%    3.23MB / 22.5kB   55.8MB / 329MB   40
+```
+
+### Shutting down main instance test
+Write load
+
+```
+> make REGISTER_DURATION=5m BENCH_N_CONN=50 bench-register
+```
+
+Resources usage while writing:
+```
+CONTAINER ID   NAME                            CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O        PIDS
+7840087dffad   social-network_db_proxy_1       65.70%    21.9MiB / 1.939GiB    1.10%     14MB / 16.5MB     72.6MB / 381kB   19
+51d8b693bab6   social-network_db_1             116.76%   427.8MiB / 1.939GiB   21.55%    7.49MB / 26.4MB   26.9MB / 384MB   109
+136ce0c99645   social-network_db_replica_1     46.34%    372.4MiB / 1.939GiB   18.76%    10.6MB / 104kB    30.8MB / 384MB   41
+f3f9b3c436ac   social-network_db_replica_2_1   44.87%    379.2MiB / 1.939GiB   19.10%    10.5MB / 96.4kB   56.2MB / 399MB   40
+```
+
+Main instance was stopped during benchmark
+```
+docker kill social-network_db_1 
+```
+
+Benchmark results:
+```
+wrk --latency --timeout 1s -d 5m -t 3 -c 50 -s benchmarks/register.lua http://localhost
+Running 5m test @ http://localhost
+  3 threads and 50 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   150.15ms   44.39ms 441.67ms   71.61%
+    Req/Sec   106.94     31.76   300.00     66.85%
+  Latency Distribution
+     50%  143.45ms
+     75%  174.20ms
+     90%  209.07ms
+     99%  285.41ms
+  95696 requests in 5.00m, 8.85MB read
+  Socket errors: connect 0, read 0, write 0, timeout 96
+Requests/sec:    319.01
+Transfer/sec:     30.22KB
+```
+
+So ~95,700 users must have been saved in at least one replica.
+Write performance was roughly the same as with async replication.
+
+Replica instance 1:
+```
+mysql> select count(1) from profiles;
++----------+
+| count(1) |
++----------+
+|    95690 |
++----------+
+1 row in set (0.03 sec)
+```
+
+Replica instance 2:
+```
+mysql> select count(1) from profiles;
++----------+
+| count(1) |
++----------+
+|    95690 |
++----------+
+1 row in set (0.00 sec)
+```
+
+Starting up main again:
+```
+mysql> select count(1) from profiles;
++----------+
+| count(1) |
++----------+
+|    95693 |
++----------+
+1 row in set (0.00 sec)
+```
+
+So 3 rows were lost after killing main instance with semi-sync replication enabled.
