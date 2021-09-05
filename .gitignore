@@ -3,3 +3,4 @@
 bin
 coverage.txt
 benchmarks/requests/*.txt
+.DS_Store

@@ -1,0 +1,6 @@
+CREATE USER {{ .Env.MYSQL_REPLICA_USER }}@'%' IDENTIFIED WITH mysql_native_password BY '{{ .Env.MYSQL_REPLICA_PASSWORD }}';
+GRANT REPLICATION SLAVE ON *.* TO {{ .Env.MYSQL_REPLICA_USER }}@'%';
+
+INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';
+SET GLOBAL rpl_semi_sync_master_enabled = ON;
+SET GLOBAL rpl_semi_sync_master_timeout = 1000;
