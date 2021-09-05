@@ -3,8 +3,9 @@ install: deps tools
 
 env:
 	make db
-	sleep 30
+	sleep 5
 	make db-proxy
+	sleep 5
 	make migrate
 
 stop-env:
