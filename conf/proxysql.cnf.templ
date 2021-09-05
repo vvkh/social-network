@@ -77,7 +77,7 @@ mysql_query_rules:
         rule_id=1
         active=1
         match_pattern="^SELECT \* FROM `profiles`"
-        destination_hostgroup=1
+        destination_hostgroup={{ .Env.PROXY_SEARCH_PROFILES_HOST }}
         apply=1
     },
 )
