@@ -3,13 +3,13 @@
 
 ## Baseline
 
-Empty db
+### Resources usage while idle
 ```
 CONTAINER ID   NAME                  CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O        PIDS
 f76507060844   social-network_db_1   0.61%     407.1MiB / 1.941GiB   20.49%    16.1kB / 14.4kB   94.9MB / 286MB   38
 ```
 
-While loading data
+### Resources usage while writing
 ```
 > make REGISTER_DURATION=5m BENCH_N_CONN=50 bench-register
 
@@ -17,7 +17,7 @@ CONTAINER ID   NAME                  CPU %     MEM USAGE / LIMIT     MEM %     N
 f76507060844   social-network_db_1   211.28%   533.1MiB / 1.941GiB   26.82%    144MB / 133MB   95.2MB / 1.28GB   90
 ```
 
-Benchmark results
+### Benchmark results
 ```
 > wrk --latency --timeout 1s -d 5m -t 3 -c 50 -s benchmarks/register.lua http://localhost
 Running 5m test @ http://localhost
@@ -36,7 +36,7 @@ Requests/sec:    403.31
 Transfer/sec:     38.20KB
 ```
 
-While reading
+### Resources usage while reading
 ```
 > make BENCH_DURATION=5m BENCH_N_CONN=50 BENCH_TIMEOUT=10s bench-search
 
@@ -44,7 +44,7 @@ CONTAINER ID   NAME                  CPU %     MEM USAGE / LIMIT     MEM %     N
 f76507060844   social-network_db_1   509.02%   546.8MiB / 1.941GiB   27.51%    182MB / 344MB   95.5MB / 1.28GB   90
 ```
 
-Benchmark results
+### Benchmark results
 ```
 wrk --latency --timeout 10s -d 5m -t 3 -c 50 -s benchmarks/search.lua http://localhost
 
@@ -63,3 +63,86 @@ Running 5m test @ http://localhost
 Requests/sec:    271.98
 Transfer/sec:    564.62KB
 ```
+
+## Async replication
+
+Async replication with one replica was configured. Read queries were routed to replica, write queries were routed to main instance.
+Query routing was configured through `proxysql` rule:
+```
+mysql_query_rules:
+(
+    {
+        rule_id=1
+        active=1
+        match_pattern="^SELECT \* FROM `profiles`"
+        destination_hostgroup=1
+        apply=1
+    },
+)
+```
+
+Main node config:
+```
+[mysqld]
+server-id=1
+binlog_format=ROW
+log-bin
+```
+
+### Resources usage while writing
+```
+> wrk --latency --timeout 1s -d 5m -t 3 -c 50 -s benchmarks/register.lua http://localhost
+
+CONTAINER ID   NAME                          CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O        PIDS
+3bfa9158cc07   social-network_db_proxy_1     66.62%    18MiB / 1.939GiB      0.91%     106MB / 126MB     16.4kB / 0B      19
+15faa3501e76   social-network_db_replica_1   56.59%    382.3MiB / 1.939GiB   19.26%    55.7MB / 534kB    43.9MB / 773MB   43
+24718d51a7b1   social-network_db_1           111.96%   447.2MiB / 1.939GiB   22.53%    59.5MB / 96.6MB   33.7MB / 743MB   116
+```
+
+### Benchmark results
+```
+wrk --latency --timeout 1s -d 5m -t 3 -c 50 -s benchmarks/register.lua http://localhost
+Running 5m test @ http://localhost
+  3 threads and 50 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   149.48ms   45.78ms 480.25ms   71.54%
+    Req/Sec   107.65     32.67   303.00     70.23%
+  Latency Distribution
+     50%  142.12ms
+     75%  174.11ms
+     90%  210.77ms
+     99%  287.49ms
+  95890 requests in 5.00m, 8.87MB read
+  Socket errors: connect 0, read 0, write 0, timeout 144
+Requests/sec:    319.54
+Transfer/sec:     30.27KB
+```
+So async replication didn't have any significant impact on write performance.
+
+### Resources usage while reading
+```
+CONTAINER ID   NAME                          CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O         PIDS
+15faa3501e76   social-network_db_replica_1   355.66%   413.5MiB / 1.939GiB   20.83%    84.7MB / 22.6MB   115MB / 4.04GB    89
+24718d51a7b1   social-network_db_1           17.35%    388.3MiB / 1.939GiB   19.56%    95.8MB / 185MB    44.3MB / 1.03GB   56
+4b928805224f   social-network_db_proxy_1     39.27%    23.79MiB / 1.939GiB   1.20%     41.1MB / 51.1MB   14MB / 381kB      19
+```
+
+### Benchmark results
+```
+wrk --latency --timeout 10s -d 5m -t 3 -c 50 -s benchmarks/search.lua http://localhost
+Running 5m test @ http://localhost
+  3 threads and 50 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   322.85ms  399.15ms   3.86s    84.83%
+    Req/Sec    84.82     59.00   696.00     75.14%
+  Latency Distribution
+     50%  185.97ms
+     75%  519.21ms
+     90%  875.61ms
+     99%    1.68s
+  74638 requests in 5.00m, 149.77MB read
+  Non-2xx or 3xx responses: 48
+Requests/sec:    248.71
+Transfer/sec:    511.04KB
+```
+Read performance was roughly the same as well but with way less load on main db instance.

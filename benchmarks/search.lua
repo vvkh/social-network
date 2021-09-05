@@ -30,7 +30,6 @@ end
 response = function(status, headers, body)
     if not user_created then
         user_created = true
-        print("user wrk created")
         wrk.path = "/login/"
         wrk.body = "password=wrk&username=wrk"
         return
@@ -39,7 +38,6 @@ response = function(status, headers, body)
         authenticated = true
         cookie = headers["Set-Cookie"]
         wrk.headers["Cookie"] = cookie
-        print("authenticated wrk with cookie ", cookie, " status ", status)
 
         wrk.method = "GET"
         wrk.headers["Content-type"] = ""
