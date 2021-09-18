@@ -65,8 +65,9 @@ gen-bench: build
 BENCH_N_CONN=50
 BENCH_DURATION=5m
 BENCH_TIMEOUT=1s
+BENCH_THREADS=3
 bench-register:
-	wrk --latency --timeout $(BENCH_TIMEOUT) -d $(BENCH_DURATION) -t 3 -c $(BENCH_N_CONN) -s benchmarks/register.lua http://localhost
+	wrk --latency --timeout $(BENCH_TIMEOUT) -d $(BENCH_DURATION) -t $(BENCH_THREADS) -c $(BENCH_N_CONN) -s benchmarks/register.lua http://localhost
 
 bench-search:
-	wrk --latency --timeout $(BENCH_TIMEOUT) -d $(BENCH_DURATION) -t 3 -c $(BENCH_N_CONN) -s benchmarks/search.lua http://localhost
+	wrk --latency --timeout $(BENCH_TIMEOUT) -d $(BENCH_DURATION) -t $(BENCH_THREADS) -c $(BENCH_N_CONN) -s benchmarks/search.lua http://localhost
