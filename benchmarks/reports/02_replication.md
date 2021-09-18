@@ -205,21 +205,39 @@ wrk --latency --timeout 1s -d 5m -t 3 -c 50 -s benchmarks/register.lua http://lo
 Running 5m test @ http://localhost
   3 threads and 50 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   150.15ms   44.39ms 441.67ms   71.61%
-    Req/Sec   106.94     31.76   300.00     66.85%
+    Latency   114.32ms   62.55ms 638.58ms   88.43%
+    Req/Sec   156.39     47.95   393.00     77.12%
   Latency Distribution
-     50%  143.45ms
-     75%  174.20ms
-     90%  209.07ms
-     99%  285.41ms
-  95696 requests in 5.00m, 8.85MB read
-  Socket errors: connect 0, read 0, write 0, timeout 96
-Requests/sec:    319.01
-Transfer/sec:     30.22KB
+     50%   94.94ms
+     75%  118.63ms
+     90%  184.91ms
+     99%  346.30ms
+  95277 requests in 3.69m, 8.89MB read
+  Socket errors: connect 0, read 0, write 0, timeout 48
+  Non-2xx or 3xx responses: 44
+Requests/sec:    430.86
+Transfer/sec:     41.15KB
 ```
 
-So ~95,700 users must have been saved in at least one replica.
-Write performance was roughly the same as with async replication.
+Following snippet was added to register.lua in order to count successful `/register` requests
+```lua
+successful_requests = 0
+response = function(status, headers, body)
+    if status == 302 then
+        successful_requests = successful_requests + 1
+        print("thread #", thread_id, "performed", successful_requests, "requests")
+    end
+end
+```
+
+Log tail
+```
+thread #	1	performed	31665	requests
+thread #	2	performed	31342	requests
+thread #	0	performed	32226	requests
+```
+
+So (31665 + 31342 + 32226) = 95233 users must have been saved in at least one replica.
 
 Replica instance 1:
 ```
@@ -227,7 +245,7 @@ mysql> select count(1) from profiles;
 +----------+
 | count(1) |
 +----------+
-|    95690 |
+|    95233 |
 +----------+
 1 row in set (0.03 sec)
 ```
@@ -238,20 +256,23 @@ mysql> select count(1) from profiles;
 +----------+
 | count(1) |
 +----------+
-|    95690 |
+|    95233 |
 +----------+
 1 row in set (0.00 sec)
 ```
 
-Starting up main again:
+So none of successful requests were lost after shutting down master. 
+
+Main instance was started up again and the number of rows was checked.
 ```
 mysql> select count(1) from profiles;
 +----------+
 | count(1) |
 +----------+
-|    95693 |
+|    95237 |
 +----------+
 1 row in set (0.00 sec)
 ```
-
-So 3 rows were lost after killing main instance with semi-sync replication enabled.
+So there were 4 requests that made it to mysql binlog but were not confirmed for the client at the moment of shutting down. 
+This means that if we had promoted any replica as the new main, it would not be safe to use that old main instance without trimming it's binlog.
+This effect is explained in details in [the following post](https://percona.community/blog/2018/08/23/question-about-semi-synchronous-replication-answer-with-all-the-details/).

@@ -40,3 +40,12 @@ request = function()
         body
     )
 end
+
+-- count successful requests if needed
+-- successful_requests = 0
+-- response = function(status, headers, body)
+--     if status == 302 then
+--         successful_requests = successful_requests + 1
+--         print("thread #", thread_id, "performed", successful_requests, "requests")
+--     end
+-- end
