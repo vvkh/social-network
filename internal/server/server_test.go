@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,6 +17,7 @@ import (
 	profilesMock "github.com/vvkh/social-network/internal/domain/profiles/mocks"
 	"github.com/vvkh/social-network/internal/domain/users/entity"
 	"github.com/vvkh/social-network/internal/domain/users/mocks"
+	"github.com/vvkh/social-network/internal/middlewares"
 )
 
 var (
@@ -54,6 +56,28 @@ var (
 		{
 			method: "POST",
 			url:    "/friends/requests/1/decline/",
+		},
+	}
+
+	routesWithNavbar = []struct {
+		method string
+		url    string
+	}{
+		{
+			method: "GET",
+			url:    "/profiles/",
+		},
+		{
+			method: "GET",
+			url:    "/profiles/1/",
+		},
+		{
+			method: "GET",
+			url:    "/friends/",
+		},
+		{
+			method: "GET",
+			url:    "/friends/requests/",
 		},
 	}
 )
@@ -144,6 +168,78 @@ func TestAuthProtectedRoutesWithInvalidTokenRedirectsToLogin(t *testing.T) {
 				require.Equal(t, "/login/", response.Header.Get("Location"))
 				if test.wantResetCookie {
 					require.Equal(t, "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly", response.Header.Get("Set-Cookie"))
+				}
+			})
+		}
+	}
+}
+
+func TestNavbar(t *testing.T) {
+	tests := []struct {
+		name                      string
+		pendingFriendshipRequests []profilesEntity.Profile
+		wantBody                  []string
+	}{
+		{
+			name: "pending_requests_count_shown_in_the_navbar",
+			pendingFriendshipRequests: []profilesEntity.Profile{
+				{
+					ID:        3,
+					UserID:    4,
+					FirstName: "John",
+					LastName:  "Doe",
+				},
+				{
+					ID:        5,
+					UserID:    6,
+					FirstName: "Topsy",
+					LastName:  "Cret",
+				},
+			},
+			wantBody: []string{
+				`<a href="/friends/">Friends (2)</a>`,
+			},
+		},
+		{
+			name:                      "pending_requests_count_shown_in_the_navbar_if_no_requests",
+			pendingFriendshipRequests: []profilesEntity.Profile{},
+			wantBody: []string{
+				`<a href="/friends/">Friends</a>`,
+			},
+		},
+	}
+
+	profile := profilesEntity.Profile{
+		ID: 1,
+	}
+
+	for _, test := range tests {
+		for _, route := range routesWithNavbar {
+			t.Run(route.method+" "+route.url, func(t *testing.T) {
+				ctrl := gomock.NewController(t)
+				usersUseCase := mocks.NewMockUseCase(ctrl)
+				profilesUseCase := profilesMock.NewMockUseCase(ctrl)
+				profilesUseCase.EXPECT().ListProfiles(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				profilesUseCase.EXPECT().GetByID(gomock.Any(), profile.ID).Return([]profilesEntity.Profile{profile}, nil).AnyTimes()
+				friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+				friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), profile.ID).Return(test.pendingFriendshipRequests, nil).AnyTimes()
+				friendshipUseCase.EXPECT().GetFriendshipStatus(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				friendshipUseCase.EXPECT().ListFriends(gomock.Any(), gomock.Any()).AnyTimes()
+
+				log, _ := zap.NewDevelopment()
+				s := New(log.Sugar(), ":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
+
+				request := httptest.NewRequest(route.method, route.url, nil)
+				request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), profile))
+				responseWriter := httptest.NewRecorder()
+				s.Handle(responseWriter, request)
+
+				response := responseWriter.Result()
+				body, err := io.ReadAll(response.Body)
+				require.NoError(t, err)
+
+				for _, bodyPart := range test.wantBody {
+					require.Contains(t, string(body), bodyPart)
 				}
 			})
 		}
