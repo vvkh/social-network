@@ -7,27 +7,28 @@
     <title>{{ template "title" }}</title>
 </head>
 <body>
-    {{ with .Navbar }}
     <nav>
         Menu
         <ul>
-            {{ if .SelfProfileID }}
-                <li>
-                    <a href="/">Home</a>
-                </li>
-                <li>
-                    {{ if .PendingFriendshipRequestsCount }}
-                        <a href="/friends/">Friends ({{ .PendingFriendshipRequestsCount }})</a>
-                    {{ else }}
-                        <a href="/friends/">Friends</a>
-                    {{ end }}
-                </li>
-                <li>
-                    <a href="/profiles/">All profiles</a>
-                </li>
-                <li>
-                    <a href="/logout/">Logout</a>
-                </li>
+            {{ with .Navbar }}
+                {{ if .SelfProfileID }}
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    <li>
+                        {{ if .PendingFriendshipRequestsCount }}
+                            <a href="/friends/">Friends ({{ .PendingFriendshipRequestsCount }})</a>
+                        {{ else }}
+                            <a href="/friends/">Friends</a>
+                        {{ end }}
+                    </li>
+                    <li>
+                        <a href="/profiles/">All profiles</a>
+                    </li>
+                    <li>
+                        <a href="/logout/">Logout</a>
+                    </li>
+                {{ end }}
             {{ else }}
                 <li>
                     <a href="/login/">Login</a>
@@ -38,7 +39,6 @@
             {{ end }}
         </ul>
     </nav>
-    {{ end  }}
     {{ template "content" . }}
 </body>
 </html>
