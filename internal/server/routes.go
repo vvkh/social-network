@@ -11,6 +11,7 @@ import (
 	profilesDomain "github.com/vvkh/social-network/internal/domain/profiles"
 	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/middlewares"
+	navbar "github.com/vvkh/social-network/internal/navbar"
 	"github.com/vvkh/social-network/internal/permissions"
 	"github.com/vvkh/social-network/internal/routes/friend"
 	"github.com/vvkh/social-network/internal/routes/friends"
@@ -29,6 +30,7 @@ const (
 )
 
 func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersUseCase users.UseCase, profilesUseCase profilesDomain.UseCase, friendshipUseCase friendship.UseCase) {
+	navbar := navbar.New(friendshipUseCase, nil)
 	templates := templates.New(templatesDir, "bootstrap").Add("base.gohtml")
 
 	s.handler.Use(middleware.RequestID)
@@ -51,10 +53,10 @@ func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersU
 		r.Post("/", register.HandlePost(log, usersUseCase, "/login/", templates))
 	})
 	s.handler.Route("/friends/", func(r chi.Router) {
-		r.Get("/", authRequired(friends.Handle(friendshipUseCase, templates)))
+		r.Get("/", authRequired(friends.Handle(friendshipUseCase, navbar, templates)))
 		r.Post("/{profile:[0-9]+}/stop/", friend.HandleStop(friendshipUseCase))
 		r.Route("/requests", func(r chi.Router) {
-			r.Get("/", authRequired(friends_requests.Handle(friendshipUseCase, templates)))
+			r.Get("/", authRequired(friends_requests.Handle(friendshipUseCase, navbar, templates)))
 			r.Post("/{profileFrom:[0-9]+}/accept/", authRequired(friends_requests.HandlePostAccept(friendshipUseCase, "/friends/requests/")))
 			r.Post("/{profileFrom:[0-9]+}/decline/", authRequired(friends_requests.HandlePostDecline(friendshipUseCase, "/friends/requests/")))
 			r.Post("/{profileTo:[0-9]+}/create/", authRequired(friends_requests.HandleCreate(friendshipUseCase)))
@@ -62,7 +64,7 @@ func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersU
 
 	})
 	s.handler.Route("/profiles/", func(r chi.Router) {
-		r.Get("/", authRequired(profiles.Handle(log, profilesUseCase, templates)))
-		r.Get("/{profileID:[0-9]+}/", authRequired(profile.Handle(profilesUseCase, friendshipUseCase, templates)))
+		r.Get("/", authRequired(profiles.Handle(log, profilesUseCase, navbar, templates)))
+		r.Get("/{profileID:[0-9]+}/", authRequired(profile.Handle(profilesUseCase, friendshipUseCase, navbar, templates)))
 	})
 }

@@ -7,10 +7,11 @@
     <title>{{ template "title" }}</title>
 </head>
 <body>
+    {{ with .Navbar }}
     <nav>
         Menu
         <ul>
-            {{ if .Self }}
+            {{ if .SelfProfileID }}
                 <li>
                     <a href="/">Home</a>
                 </li>
@@ -31,9 +32,9 @@
                     <a href="/register/">Register</a>
                 </li>
             {{ end }}
-
         </ul>
     </nav>
+    {{ end  }}
     {{ template "content" . }}
 </body>
 </html>

@@ -9,10 +9,11 @@ import (
 	"github.com/vvkh/social-network/internal/domain/friendship"
 	"github.com/vvkh/social-network/internal/domain/profiles"
 	"github.com/vvkh/social-network/internal/middlewares"
+	"github.com/vvkh/social-network/internal/navbar"
 	"github.com/vvkh/social-network/internal/templates"
 )
 
-func Handle(profiles profiles.UseCase, friendship friendship.UseCase, templates *templates.Templates) http.HandlerFunc {
+func Handle(profiles profiles.UseCase, friendship friendship.UseCase, navbar *navbar.Navbar, templates *templates.Templates) http.HandlerFunc {
 	render := templates.Add("profile.gohtml").Parse()
 
 	return func(writer http.ResponseWriter, request *http.Request) {
@@ -38,6 +39,7 @@ func Handle(profiles profiles.UseCase, friendship friendship.UseCase, templates 
 
 		selfProfileDto := dtoFromModel(self)
 		err = render(writer, Context{
+			Navbar:                          navbar.GetContext(request.Context()),
 			Self:                            selfProfileDto,
 			Profile:                         profileDto,
 			AreFriends:                      friendshipStatus.IsAccepted(),

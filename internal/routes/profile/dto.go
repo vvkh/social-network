@@ -1,8 +1,12 @@
 package profile
 
-import "github.com/vvkh/social-network/internal/domain/profiles/entity"
+import (
+	"github.com/vvkh/social-network/internal/domain/profiles/entity"
+	"github.com/vvkh/social-network/internal/navbar"
+)
 
 type Context struct {
+	Navbar                          *navbar.Context
 	Self                            ProfileDto
 	Profile                         ProfileDto
 	AreFriends                      bool

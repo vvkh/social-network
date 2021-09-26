@@ -35,7 +35,7 @@ func (m *MockUseCase) EXPECT() *MockUseCaseMockRecorder {
 }
 
 // GetUnreadMessagesCount mocks base method
-func (m *MockUseCase) GetUnreadMessagesCount(ctx context.Context, profileID int64) (int64, error) {
+func (m *MockUseCase) GetUnreadMessagesCount(ctx context.Context, profileID uint64) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUnreadMessagesCount", ctx, profileID)
 	ret0, _ := ret[0].(int64)
@@ -50,7 +50,7 @@ func (mr *MockUseCaseMockRecorder) GetUnreadMessagesCount(ctx, profileID interfa
 }
 
 // GetOrCreateChat mocks base method
-func (m *MockUseCase) GetOrCreateChat(ctx context.Context, oneProfileID, otherProfileID int64) (int64, error) {
+func (m *MockUseCase) GetOrCreateChat(ctx context.Context, oneProfileID uint64, otherProfileID int64) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOrCreateChat", ctx, oneProfileID, otherProfileID)
 	ret0, _ := ret[0].(int64)
@@ -65,7 +65,7 @@ func (mr *MockUseCaseMockRecorder) GetOrCreateChat(ctx, oneProfileID, otherProfi
 }
 
 // ListChatMessages mocks base method
-func (m *MockUseCase) ListChatMessages(ctx context.Context, chatID int64) ([]entity.Message, error) {
+func (m *MockUseCase) ListChatMessages(ctx context.Context, chatID uint64) ([]entity.Message, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListChatMessages", ctx, chatID)
 	ret0, _ := ret[0].([]entity.Message)
@@ -80,7 +80,7 @@ func (mr *MockUseCaseMockRecorder) ListChatMessages(ctx, chatID interface{}) *go
 }
 
 // SendMessage mocks base method
-func (m *MockUseCase) SendMessage(ctx context.Context, chatID, authorProfileID int64, message string) error {
+func (m *MockUseCase) SendMessage(ctx context.Context, chatID uint64, authorProfileID int64, message string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendMessage", ctx, chatID, authorProfileID, message)
 	ret0, _ := ret[0].(error)

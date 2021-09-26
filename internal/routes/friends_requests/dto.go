@@ -1,8 +1,12 @@
 package friends_requests
 
-import "github.com/vvkh/social-network/internal/domain/profiles/entity"
+import (
+	"github.com/vvkh/social-network/internal/domain/profiles/entity"
+	"github.com/vvkh/social-network/internal/navbar"
+)
 
 type Contex struct {
+	Navbar          *navbar.Context
 	Self            ProfileDto
 	PendingRequests []ProfileDto
 }

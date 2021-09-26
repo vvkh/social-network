@@ -1,6 +1,9 @@
 package profiles
 
-import "github.com/vvkh/social-network/internal/domain/profiles/entity"
+import (
+	"github.com/vvkh/social-network/internal/domain/profiles/entity"
+	"github.com/vvkh/social-network/internal/navbar"
+)
 
 type Dto struct {
 	FirstName string
@@ -18,6 +21,7 @@ type ShowMoreLimit struct {
 	NextLimit int
 }
 type Context struct {
+	Navbar          *navbar.Context
 	Self            Dto
 	Profiles        []Dto
 	Filters         Filters
