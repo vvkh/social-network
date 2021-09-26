@@ -167,7 +167,7 @@ func TestProfilePage(t *testing.T) {
 			friendshipUseCase.EXPECT().GetFriendshipStatus(gomock.Any(), test.profile.ID, test.self.ID).Return(test.friendshipStatus, nil)
 			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), test.self.ID)
 			log, _ := zap.NewDevelopment()
-			s := server.New(log.Sugar(), ":80", "../../../templates", nil, profilesUseCase, friendshipUseCase)
+			s := server.New(log.Sugar(), ":80", "../../../templates", nil, profilesUseCase, friendshipUseCase, nil)
 
 			request := httptest.NewRequest("GET", test.url, nil)
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))

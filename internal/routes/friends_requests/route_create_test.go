@@ -44,7 +44,7 @@ func TestProfilePageFriendshipRequest(t *testing.T) {
 			friendshipUseCase := mocks.NewMockUseCase(ctrl)
 			friendshipUseCase.EXPECT().CreateRequest(gomock.Any(), test.self.ID, test.profile.ID).Return(nil)
 			log, _ := zap.NewDevelopment()
-			s := server.New(log.Sugar(), ":80", "../../../templates", nil, nil, friendshipUseCase)
+			s := server.New(log.Sugar(), ":80", "../../../templates", nil, nil, friendshipUseCase, nil)
 
 			request := httptest.NewRequest("POST", test.url, nil)
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))

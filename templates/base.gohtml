@@ -23,6 +23,13 @@
                         {{ end }}
                     </li>
                     <li>
+                        {{ if .UnreadMessagesCount }}
+                            <a href="/chats/">Chats ({{ .UnreadMessagesCount }})</a>
+                        {{ else }}
+                            <a href="/chats/">Chats</a>
+                        {{ end }}
+                    </li>
+                    <li>
                         <a href="/profiles/">All profiles</a>
                     </li>
                     <li>

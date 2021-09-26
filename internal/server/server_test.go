@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	chatMocks "github.com/vvkh/social-network/internal/domain/chats/mocks"
 	friendshipMock "github.com/vvkh/social-network/internal/domain/friendship/mocks"
 	profilesEntity "github.com/vvkh/social-network/internal/domain/profiles/entity"
 	profilesMock "github.com/vvkh/social-network/internal/domain/profiles/mocks"
@@ -90,7 +91,7 @@ func TestAuthProtectedRoutesRedirectToLogin(t *testing.T) {
 			profilesUseCase := profilesMock.NewMockUseCase(ctrl)
 			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
 			log, _ := zap.NewDevelopment()
-			s := New(log.Sugar(), ":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
+			s := New(log.Sugar(), ":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase, nil)
 
 			request := httptest.NewRequest(route.method, route.url, nil)
 			responseWriter := httptest.NewRecorder()
@@ -151,7 +152,7 @@ func TestAuthProtectedRoutesWithInvalidTokenRedirectsToLogin(t *testing.T) {
 				profilesUseCase := profilesMock.NewMockUseCase(ctrl)
 				profilesUseCase.EXPECT().GetByID(gomock.Any(), test.mocksToken.ProfileID).Return(test.getProfileMockResponse, test.getProfileMockErr)
 				log, _ := zap.NewDevelopment()
-				s := New(log.Sugar(), ":80", "../../templates", usersUseCase, profilesUseCase, nil)
+				s := New(log.Sugar(), ":80", "../../templates", usersUseCase, profilesUseCase, nil, nil)
 
 				request := httptest.NewRequest(route.method, route.url, nil)
 				request.AddCookie(&http.Cookie{
@@ -178,6 +179,7 @@ func TestNavbar(t *testing.T) {
 	tests := []struct {
 		name                      string
 		pendingFriendshipRequests []profilesEntity.Profile
+		unreadMessagesCount       int64
 		wantBody                  []string
 	}{
 		{
@@ -207,6 +209,20 @@ func TestNavbar(t *testing.T) {
 				`<a href="/friends/">Friends</a>`,
 			},
 		},
+		{
+			name:                "unread_messages_count_is_shown_in_navbar",
+			unreadMessagesCount: 10,
+			wantBody: []string{
+				`<a href="/chats/">Chats (10)</a>`,
+			},
+		},
+		{
+			name:                "unread_messages_count_is_not_shown_in_navbar_if_no_messages",
+			unreadMessagesCount: 0,
+			wantBody: []string{
+				`<a href="/chats/">Chats</a>`,
+			},
+		},
 	}
 
 	profile := profilesEntity.Profile{
@@ -225,9 +241,10 @@ func TestNavbar(t *testing.T) {
 				friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), profile.ID).Return(test.pendingFriendshipRequests, nil).AnyTimes()
 				friendshipUseCase.EXPECT().GetFriendshipStatus(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 				friendshipUseCase.EXPECT().ListFriends(gomock.Any(), gomock.Any()).AnyTimes()
-
+				chatsUseCase := chatMocks.NewMockUseCase(ctrl)
+				chatsUseCase.EXPECT().GetUnreadMessagesCount(gomock.Any(), profile.ID).Return(test.unreadMessagesCount, nil)
 				log, _ := zap.NewDevelopment()
-				s := New(log.Sugar(), ":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase)
+				s := New(log.Sugar(), ":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase, chatsUseCase)
 
 				request := httptest.NewRequest(route.method, route.url, nil)
 				request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), profile))

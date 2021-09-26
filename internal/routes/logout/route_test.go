@@ -27,7 +27,7 @@ func TestHandle(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			log := zap.NewNop().Sugar()
-			s := server.New(log, ":80", "../../../templates", nil, nil, nil)
+			s := server.New(log, ":80", "../../../templates", nil, nil, nil, nil)
 			request := httptest.NewRequest("GET", "/logout/", nil)
 			responseWriter := httptest.NewRecorder()
 			s.Handle(responseWriter, request)

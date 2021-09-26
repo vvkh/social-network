@@ -20,7 +20,7 @@ func TestHandleGet(t *testing.T) {
 	log := zap.NewNop().Sugar()
 	ctrl := gomock.NewController(t)
 	usersUseCase := mocks.NewMockUseCase(ctrl)
-	s := server.New(log, ":80", "../../../templates", usersUseCase, nil, nil)
+	s := server.New(log, ":80", "../../../templates", usersUseCase, nil, nil, nil)
 	request := httptest.NewRequest("GET", "/register/", nil)
 	responseWriter := httptest.NewRecorder()
 	s.Handle(responseWriter, request)
@@ -116,7 +116,7 @@ func TestHandlePost(t *testing.T) {
 					test.mockWantIn.about,
 				).Return(uint64(0), uint64(0), test.mockResponseError)
 			}
-			s := server.New(log, ":80", "../../../templates", usersUC, nil, nil)
+			s := server.New(log, ":80", "../../../templates", usersUC, nil, nil, nil)
 			form := strings.NewReader(test.form)
 			request := httptest.NewRequest("POST", "/register/", form)
 			request.Header.Set("Content-Type", "application/x-www-form-urlencoded")

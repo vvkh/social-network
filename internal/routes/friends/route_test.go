@@ -84,7 +84,7 @@ func TestFriendsPage(t *testing.T) {
 			friendshipUseCase.EXPECT().ListFriends(gomock.Any(), test.self.ID).Return(test.friends, nil)
 			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), test.self.ID).Return(test.friendshipRequests, nil).AnyTimes()
 			log, _ := zap.NewDevelopment()
-			s := server.New(log.Sugar(), ":80", "../../../templates", nil, nil, friendshipUseCase)
+			s := server.New(log.Sugar(), ":80", "../../../templates", nil, nil, friendshipUseCase, nil)
 
 			request := httptest.NewRequest("GET", "/friends/", nil)
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))

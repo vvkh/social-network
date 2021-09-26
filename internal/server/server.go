@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 
+	"github.com/vvkh/social-network/internal/domain/chats"
 	"github.com/vvkh/social-network/internal/domain/friendship"
 	"github.com/vvkh/social-network/internal/domain/profiles"
 	"github.com/vvkh/social-network/internal/domain/users"
@@ -17,14 +18,14 @@ type server struct {
 	log     *zap.SugaredLogger
 }
 
-func New(log *zap.SugaredLogger, address string, tempalatesDir string, usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase) *server {
+func New(log *zap.SugaredLogger, address string, tempalatesDir string, usersUseCase users.UseCase, profilesUseCase profiles.UseCase, friendshipUseCase friendship.UseCase, chatsUseCase chats.UseCase) *server {
 	router := chi.NewRouter()
 	s := server{
 		handler: router,
 		address: address,
 		log:     log,
 	}
-	s.setupRoutes(log, tempalatesDir, usersUseCase, profilesUseCase, friendshipUseCase)
+	s.setupRoutes(log, tempalatesDir, usersUseCase, profilesUseCase, friendshipUseCase, chatsUseCase)
 	return &s
 }
 

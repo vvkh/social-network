@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 
+	"github.com/vvkh/social-network/internal/domain/chats"
 	"github.com/vvkh/social-network/internal/domain/friendship"
 	profilesDomain "github.com/vvkh/social-network/internal/domain/profiles"
 	"github.com/vvkh/social-network/internal/domain/users"
@@ -29,8 +30,8 @@ const (
 	defaultHandlerTimeout = 60 * time.Second
 )
 
-func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersUseCase users.UseCase, profilesUseCase profilesDomain.UseCase, friendshipUseCase friendship.UseCase) {
-	navbar := navbar.New(log, friendshipUseCase, nil)
+func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersUseCase users.UseCase, profilesUseCase profilesDomain.UseCase, friendshipUseCase friendship.UseCase, chatUseCase chats.UseCase) {
+	navbar := navbar.New(log, friendshipUseCase, chatUseCase)
 	templates := templates.New(templatesDir, "bootstrap").Add("base.gohtml")
 
 	s.handler.Use(middleware.RequestID)

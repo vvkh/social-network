@@ -207,7 +207,7 @@ func TestHandle(t *testing.T) {
 			profilesUseCase.EXPECT().ListProfiles(gomock.Any(), test.mockWantIn.firstName, test.mockWantIn.lastName, test.mockWantIn.limit).Return(test.mockResponse.profiles, test.mockResponse.hasMore, nil)
 			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
 			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), gomock.Any()).AnyTimes()
-			s := server.New(log, ":80", "../../../templates", nil, profilesUseCase, friendshipUseCase)
+			s := server.New(log, ":80", "../../../templates", nil, profilesUseCase, friendshipUseCase, nil)
 			request := httptest.NewRequest("GET", test.url, nil)
 
 			self := entity.Profile{

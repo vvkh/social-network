@@ -60,6 +60,6 @@ func run() error {
 	friendshipRepo := friendshipRepository.New(appDB)
 	friendshipUC := friendshipUseCase.New(friendshipRepo, profilesUC)
 
-	s := server.New(sugarLogger, appConfig.ServerAddress, appConfig.TemplatesDir, usersUC, profilesUC, friendshipUC)
+	s := server.New(sugarLogger, appConfig.ServerAddress, appConfig.TemplatesDir, usersUC, profilesUC, friendshipUC, nil)
 	return s.Start()
 }
