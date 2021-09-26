@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	friendshipMock "github.com/vvkh/social-network/internal/domain/friendship/mocks"
 	"github.com/vvkh/social-network/internal/domain/profiles/entity"
 	"github.com/vvkh/social-network/internal/domain/profiles/mocks"
 	"github.com/vvkh/social-network/internal/middlewares"
@@ -204,7 +205,9 @@ func TestHandle(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			profilesUseCase := mocks.NewMockUseCase(ctrl)
 			profilesUseCase.EXPECT().ListProfiles(gomock.Any(), test.mockWantIn.firstName, test.mockWantIn.lastName, test.mockWantIn.limit).Return(test.mockResponse.profiles, test.mockResponse.hasMore, nil)
-			s := server.New(log, ":80", "../../../templates", nil, profilesUseCase, nil)
+			friendshipUseCase := friendshipMock.NewMockUseCase(ctrl)
+			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), gomock.Any()).AnyTimes()
+			s := server.New(log, ":80", "../../../templates", nil, profilesUseCase, friendshipUseCase)
 			request := httptest.NewRequest("GET", test.url, nil)
 
 			self := entity.Profile{

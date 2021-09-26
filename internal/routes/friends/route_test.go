@@ -75,6 +75,41 @@ func TestFriendsPage(t *testing.T) {
 				`<a href="/friends/requests/">Pending friendship requests (2)</a>`,
 			},
 		},
+		{
+			name: "pending_requests_count_shown_in_the_navbar_if_no_requests",
+			self: entity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			friendshipRequests: []entity.Profile{},
+			wantBodyParts: []string{
+				`<a href="/friends/">Friends</a>`,
+			},
+		},
+		{
+			name: "pending_requests_count_shown_in_the_navbar",
+			self: entity.Profile{
+				ID:     1,
+				UserID: 2,
+			},
+			friendshipRequests: []entity.Profile{
+				{
+					ID:        3,
+					UserID:    4,
+					FirstName: "John",
+					LastName:  "Doe",
+				},
+				{
+					ID:        5,
+					UserID:    6,
+					FirstName: "Topsy",
+					LastName:  "Cret",
+				},
+			},
+			wantBodyParts: []string{
+				`<a href="/friends/">Friends (2)</a>`,
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -82,7 +117,7 @@ func TestFriendsPage(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			friendshipUseCase := mocks.NewMockUseCase(ctrl)
 			friendshipUseCase.EXPECT().ListFriends(gomock.Any(), test.self.ID).Return(test.friends, nil)
-			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), test.self.ID).Return(test.friendshipRequests, nil)
+			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), test.self.ID).Return(test.friendshipRequests, nil).AnyTimes()
 			log, _ := zap.NewDevelopment()
 			s := server.New(log.Sugar(), ":80", "../../../templates", nil, nil, friendshipUseCase)
 

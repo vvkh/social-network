@@ -6,10 +6,12 @@ package mocks
 
 import (
 	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
+
 	entity "github.com/vvkh/social-network/internal/domain/friendship/entity"
 	entity0 "github.com/vvkh/social-network/internal/domain/profiles/entity"
-	reflect "reflect"
 )
 
 // MockUseCase is a mock of UseCase interface

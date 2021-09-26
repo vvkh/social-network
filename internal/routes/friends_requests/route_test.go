@@ -59,7 +59,7 @@ func TestFriendshipRequestPage(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			friendshipUseCase := mocks.NewMockUseCase(ctrl)
-			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), test.self.ID).Return(test.friendshipRequests, nil)
+			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), test.self.ID).Return(test.friendshipRequests, nil).AnyTimes()
 
 			request := httptest.NewRequest("GET", "/friends/requests/", nil)
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))

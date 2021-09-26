@@ -165,6 +165,7 @@ func TestProfilePage(t *testing.T) {
 			profilesUseCase.EXPECT().GetByID(gomock.Any(), test.profile.ID).Return([]entity.Profile{test.profile}, nil)
 			friendshipUseCase := friendshipMocks.NewMockUseCase(ctrl)
 			friendshipUseCase.EXPECT().GetFriendshipStatus(gomock.Any(), test.profile.ID, test.self.ID).Return(test.friendshipStatus, nil)
+			friendshipUseCase.EXPECT().ListPendingRequests(gomock.Any(), test.self.ID)
 			log, _ := zap.NewDevelopment()
 			s := server.New(log.Sugar(), ":80", "../../../templates", nil, profilesUseCase, friendshipUseCase)
 

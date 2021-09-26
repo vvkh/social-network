@@ -16,7 +16,11 @@
                     <a href="/">Home</a>
                 </li>
                 <li>
-                    <a href="/friends/">Friends</a>
+                    {{ if .PendingFriendshipRequestsCount }}
+                        <a href="/friends/">Friends ({{ .PendingFriendshipRequestsCount }})</a>
+                    {{ else }}
+                        <a href="/friends/">Friends</a>
+                    {{ end }}
                 </li>
                 <li>
                     <a href="/profiles/">All profiles</a>

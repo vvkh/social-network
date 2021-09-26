@@ -30,7 +30,7 @@ const (
 )
 
 func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersUseCase users.UseCase, profilesUseCase profilesDomain.UseCase, friendshipUseCase friendship.UseCase) {
-	navbar := navbar.New(friendshipUseCase, nil)
+	navbar := navbar.New(log, friendshipUseCase, nil)
 	templates := templates.New(templatesDir, "bootstrap").Add("base.gohtml")
 
 	s.handler.Use(middleware.RequestID)
