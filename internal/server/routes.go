@@ -7,13 +7,14 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 
-	"github.com/vvkh/social-network/internal/domain/chats"
+	chatsDomain "github.com/vvkh/social-network/internal/domain/chats"
 	"github.com/vvkh/social-network/internal/domain/friendship"
 	profilesDomain "github.com/vvkh/social-network/internal/domain/profiles"
 	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/middlewares"
 	navbar "github.com/vvkh/social-network/internal/navbar"
 	"github.com/vvkh/social-network/internal/permissions"
+	"github.com/vvkh/social-network/internal/routes/chats"
 	"github.com/vvkh/social-network/internal/routes/friend"
 	"github.com/vvkh/social-network/internal/routes/friends"
 	"github.com/vvkh/social-network/internal/routes/friends_requests"
@@ -30,7 +31,7 @@ const (
 	defaultHandlerTimeout = 60 * time.Second
 )
 
-func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersUseCase users.UseCase, profilesUseCase profilesDomain.UseCase, friendshipUseCase friendship.UseCase, chatUseCase chats.UseCase) {
+func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersUseCase users.UseCase, profilesUseCase profilesDomain.UseCase, friendshipUseCase friendship.UseCase, chatUseCase chatsDomain.UseCase) {
 	navbar := navbar.New(log, friendshipUseCase, chatUseCase)
 	templates := templates.New(templatesDir, "bootstrap").Add("base.gohtml")
 
@@ -67,5 +68,8 @@ func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersU
 	s.handler.Route("/profiles/", func(r chi.Router) {
 		r.Get("/", authRequired(profiles.Handle(log, profilesUseCase, navbar, templates)))
 		r.Get("/{profileID:[0-9]+}/", authRequired(profile.Handle(profilesUseCase, friendshipUseCase, navbar, templates)))
+	})
+	s.handler.Route("/chats/", func(r chi.Router) {
+		r.Get("/", authRequired(chats.Handle(log, chatUseCase, navbar, templates)))
 	})
 }

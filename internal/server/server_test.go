@@ -58,6 +58,10 @@ var (
 			method: "POST",
 			url:    "/friends/requests/1/decline/",
 		},
+		{
+			method: "GET",
+			url:    "/chats/",
+		},
 	}
 
 	routesWithNavbar = []struct {
@@ -79,6 +83,10 @@ var (
 		{
 			method: "GET",
 			url:    "/friends/requests/",
+		},
+		{
+			method: "GET",
+			url:    "/chats/",
 		},
 	}
 )
@@ -243,6 +251,7 @@ func TestNavbar(t *testing.T) {
 				friendshipUseCase.EXPECT().ListFriends(gomock.Any(), gomock.Any()).AnyTimes()
 				chatsUseCase := chatMocks.NewMockUseCase(ctrl)
 				chatsUseCase.EXPECT().GetUnreadMessagesCount(gomock.Any(), profile.ID).Return(test.unreadMessagesCount, nil)
+				chatsUseCase.EXPECT().ListChats(gomock.Any(), profile.ID).AnyTimes()
 				log, _ := zap.NewDevelopment()
 				s := New(log.Sugar(), ":80", "../../templates", usersUseCase, profilesUseCase, friendshipUseCase, chatsUseCase)
 

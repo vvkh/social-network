@@ -1,0 +1,12 @@
+{{ define "title"}}Friends{{end}}
+
+{{ define "content" }}
+    <h1>Chats</h1>
+    {{ range .Chats }}
+        {{ if .UnreadMessagesCount }}
+            <a href="/chats/{{.ID}}/">{{.Title}} ({{ .UnreadMessagesCount }})</a>
+        {{ else }}
+            <a href="/chats/{{.ID}}/">{{.Title}}</a>
+        {{ end }}
+    {{ end }}
+{{ end }}

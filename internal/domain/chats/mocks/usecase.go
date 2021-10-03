@@ -6,11 +6,9 @@ package mocks
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
-
 	entity "github.com/vvkh/social-network/internal/domain/chats/entity"
+	reflect "reflect"
 )
 
 // MockUseCase is a mock of UseCase interface
@@ -64,6 +62,21 @@ func (m *MockUseCase) GetOrCreateChat(ctx context.Context, oneProfileID uint64, 
 func (mr *MockUseCaseMockRecorder) GetOrCreateChat(ctx, oneProfileID, otherProfileID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrCreateChat", reflect.TypeOf((*MockUseCase)(nil).GetOrCreateChat), ctx, oneProfileID, otherProfileID)
+}
+
+// ListChats mocks base method
+func (m *MockUseCase) ListChats(ctx context.Context, profileID uint64) ([]entity.Chat, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListChats", ctx, profileID)
+	ret0, _ := ret[0].([]entity.Chat)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListChats indicates an expected call of ListChats
+func (mr *MockUseCaseMockRecorder) ListChats(ctx, profileID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListChats", reflect.TypeOf((*MockUseCase)(nil).ListChats), ctx, profileID)
 }
 
 // ListChatMessages mocks base method
