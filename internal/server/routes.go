@@ -14,6 +14,7 @@ import (
 	"github.com/vvkh/social-network/internal/middlewares"
 	navbar "github.com/vvkh/social-network/internal/navbar"
 	"github.com/vvkh/social-network/internal/permissions"
+	"github.com/vvkh/social-network/internal/routes/chat"
 	"github.com/vvkh/social-network/internal/routes/chats"
 	"github.com/vvkh/social-network/internal/routes/friend"
 	"github.com/vvkh/social-network/internal/routes/friends"
@@ -71,5 +72,6 @@ func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersU
 	})
 	s.handler.Route("/chats/", func(r chi.Router) {
 		r.Get("/", authRequired(chats.Handle(log, chatUseCase, navbar, templates)))
+		r.Get("/{chatID:[0-9]+}/", authRequired(chat.Handle(log, profilesUseCase, chatUseCase, navbar, templates)))
 	})
 }

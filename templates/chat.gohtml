@@ -1,0 +1,14 @@
+{{ define "title"}}Friends{{end}}
+
+{{ define "content" }}
+    <h1>{{ .Chat.Title }}</h1>
+
+    {{ range .Messages }}
+        {{ .SentAt }} <b>{{ .Author }}</b>: {{ .Content }}
+    {{ end }}
+
+    <form method="POST" action="/chats/{{ .Chat.ID }}/message/">
+        <textarea name="message"></textarea>
+        <input type="submit" value="send message">
+    </form>
+{{ end }}

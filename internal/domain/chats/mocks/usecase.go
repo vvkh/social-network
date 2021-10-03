@@ -80,30 +80,31 @@ func (mr *MockUseCaseMockRecorder) ListChats(ctx, profileID interface{}) *gomock
 }
 
 // ListChatMessages mocks base method
-func (m *MockUseCase) ListChatMessages(ctx context.Context, chatID uint64) ([]entity.Message, error) {
+func (m *MockUseCase) ListChatMessages(ctx context.Context, profileID, chatID uint64) (entity.Chat, []entity.Message, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListChatMessages", ctx, chatID)
-	ret0, _ := ret[0].([]entity.Message)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "ListChatMessages", ctx, profileID, chatID)
+	ret0, _ := ret[0].(entity.Chat)
+	ret1, _ := ret[1].([]entity.Message)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // ListChatMessages indicates an expected call of ListChatMessages
-func (mr *MockUseCaseMockRecorder) ListChatMessages(ctx, chatID interface{}) *gomock.Call {
+func (mr *MockUseCaseMockRecorder) ListChatMessages(ctx, profileID, chatID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListChatMessages", reflect.TypeOf((*MockUseCase)(nil).ListChatMessages), ctx, chatID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListChatMessages", reflect.TypeOf((*MockUseCase)(nil).ListChatMessages), ctx, profileID, chatID)
 }
 
 // SendMessage mocks base method
-func (m *MockUseCase) SendMessage(ctx context.Context, chatID uint64, authorProfileID int64, message string) error {
+func (m *MockUseCase) SendMessage(ctx context.Context, profileID, chatID uint64, authorProfileID int64, message string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendMessage", ctx, chatID, authorProfileID, message)
+	ret := m.ctrl.Call(m, "SendMessage", ctx, profileID, chatID, authorProfileID, message)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SendMessage indicates an expected call of SendMessage
-func (mr *MockUseCaseMockRecorder) SendMessage(ctx, chatID, authorProfileID, message interface{}) *gomock.Call {
+func (mr *MockUseCaseMockRecorder) SendMessage(ctx, profileID, chatID, authorProfileID, message interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessage", reflect.TypeOf((*MockUseCase)(nil).SendMessage), ctx, chatID, authorProfileID, message)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessage", reflect.TypeOf((*MockUseCase)(nil).SendMessage), ctx, profileID, chatID, authorProfileID, message)
 }

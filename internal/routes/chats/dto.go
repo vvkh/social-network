@@ -11,7 +11,7 @@ type Contex struct {
 }
 
 type ChatDto struct {
-	ID                  int64
+	ID                  uint64
 	Title               string
 	UnreadMessagesCount int64
 }
