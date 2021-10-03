@@ -1,4 +1,4 @@
-package friends_requests_test
+package requests_test
 
 import (
 	"io"
@@ -65,7 +65,7 @@ func TestFriendshipRequestPage(t *testing.T) {
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))
 			responseWriter := httptest.NewRecorder()
 			log, _ := zap.NewDevelopment()
-			s := server.New(log.Sugar(), ":80", "../../../templates", nil, nil, friendshipUseCase, nil)
+			s := server.New(log.Sugar(), ":80", "../../../../templates", nil, nil, friendshipUseCase, nil)
 			s.Handle(responseWriter, request)
 
 			response := responseWriter.Result()

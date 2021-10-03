@@ -1,4 +1,4 @@
-package friends_requests_test
+package requests_test
 
 import (
 	"net/http"
@@ -15,21 +15,26 @@ import (
 	"github.com/vvkh/social-network/internal/server"
 )
 
-func TestDeclineFriendshipRequest(t *testing.T) {
+func TestProfilePageFriendshipRequest(t *testing.T) {
 	tests := []struct {
-		name      string
-		self      entity.Profile
-		url       string
-		profileID uint64
+		name       string
+		profile    entity.Profile
+		self       entity.Profile
+		url        string
+		wantStatus int
 	}{
 		{
-			name: "decline_request",
-			self: entity.Profile{
+			name: "submit_friendship_form",
+			profile: entity.Profile{
 				ID:     1,
 				UserID: 2,
 			},
-			profileID: 3,
-			url:       "/friends/requests/3/decline/",
+			self: entity.Profile{
+				ID:     3,
+				UserID: 4,
+			},
+			url:        "/friends/requests/1/create/",
+			wantStatus: http.StatusFound,
 		},
 	}
 
@@ -37,18 +42,18 @@ func TestDeclineFriendshipRequest(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			friendshipUseCase := mocks.NewMockUseCase(ctrl)
-			friendshipUseCase.EXPECT().DeclineRequest(gomock.Any(), test.profileID, test.self.ID).Return(nil)
+			friendshipUseCase.EXPECT().CreateRequest(gomock.Any(), test.self.ID, test.profile.ID).Return(nil)
 			log, _ := zap.NewDevelopment()
-			s := server.New(log.Sugar(), ":80", "../../../templates", nil, nil, friendshipUseCase, nil)
+			s := server.New(log.Sugar(), ":80", "../../../../templates", nil, nil, friendshipUseCase, nil)
+
 			request := httptest.NewRequest("POST", test.url, nil)
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))
-			responseWriter := httptest.NewRecorder()
 
+			responseWriter := httptest.NewRecorder()
 			s.Handle(responseWriter, request)
 
 			response := responseWriter.Result()
-			require.Equal(t, http.StatusFound, response.StatusCode)
-			require.Equal(t, "/friends/requests/", response.Header.Get("Location"))
+			require.Equal(t, test.wantStatus, response.StatusCode)
 		})
 	}
 }

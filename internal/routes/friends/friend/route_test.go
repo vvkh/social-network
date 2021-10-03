@@ -41,7 +41,7 @@ func TestStopFriendship(t *testing.T) {
 			friendshipUseCase := mocks.NewMockUseCase(ctrl)
 			friendshipUseCase.EXPECT().StopFriendship(gomock.Any(), test.self.ID, test.profileID).Return(nil)
 			log, _ := zap.NewDevelopment()
-			s := server.New(log.Sugar(), ":80", "../../../templates", nil, nil, friendshipUseCase, nil)
+			s := server.New(log.Sugar(), ":80", "../../../../templates", nil, nil, friendshipUseCase, nil)
 			request := httptest.NewRequest("POST", test.url, nil)
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))
 			responseWriter := httptest.NewRecorder()

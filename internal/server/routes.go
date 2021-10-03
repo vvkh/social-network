@@ -12,18 +12,18 @@ import (
 	profilesDomain "github.com/vvkh/social-network/internal/domain/profiles"
 	"github.com/vvkh/social-network/internal/domain/users"
 	"github.com/vvkh/social-network/internal/middlewares"
-	navbar "github.com/vvkh/social-network/internal/navbar"
+	"github.com/vvkh/social-network/internal/navbar"
 	"github.com/vvkh/social-network/internal/permissions"
-	"github.com/vvkh/social-network/internal/routes/chat"
 	"github.com/vvkh/social-network/internal/routes/chats"
-	"github.com/vvkh/social-network/internal/routes/friend"
+	"github.com/vvkh/social-network/internal/routes/chats/chat"
 	"github.com/vvkh/social-network/internal/routes/friends"
-	"github.com/vvkh/social-network/internal/routes/friends_requests"
+	"github.com/vvkh/social-network/internal/routes/friends/friend"
+	"github.com/vvkh/social-network/internal/routes/friends/requests"
 	"github.com/vvkh/social-network/internal/routes/index"
 	"github.com/vvkh/social-network/internal/routes/login"
 	"github.com/vvkh/social-network/internal/routes/logout"
-	"github.com/vvkh/social-network/internal/routes/profile"
 	"github.com/vvkh/social-network/internal/routes/profiles"
+	"github.com/vvkh/social-network/internal/routes/profiles/profile"
 	"github.com/vvkh/social-network/internal/routes/register"
 	"github.com/vvkh/social-network/internal/templates"
 )
@@ -59,10 +59,10 @@ func (s *server) setupRoutes(log *zap.SugaredLogger, templatesDir string, usersU
 		r.Get("/", authRequired(friends.Handle(friendshipUseCase, navbar, templates)))
 		r.Post("/{profile:[0-9]+}/stop/", friend.HandleStop(friendshipUseCase))
 		r.Route("/requests", func(r chi.Router) {
-			r.Get("/", authRequired(friends_requests.Handle(friendshipUseCase, navbar, templates)))
-			r.Post("/{profileFrom:[0-9]+}/accept/", authRequired(friends_requests.HandlePostAccept(friendshipUseCase, "/friends/requests/")))
-			r.Post("/{profileFrom:[0-9]+}/decline/", authRequired(friends_requests.HandlePostDecline(friendshipUseCase, "/friends/requests/")))
-			r.Post("/{profileTo:[0-9]+}/create/", authRequired(friends_requests.HandleCreate(friendshipUseCase)))
+			r.Get("/", authRequired(requests.Handle(friendshipUseCase, navbar, templates)))
+			r.Post("/{profileFrom:[0-9]+}/accept/", authRequired(requests.HandlePostAccept(friendshipUseCase, "/friends/requests/")))
+			r.Post("/{profileFrom:[0-9]+}/decline/", authRequired(requests.HandlePostDecline(friendshipUseCase, "/friends/requests/")))
+			r.Post("/{profileTo:[0-9]+}/create/", authRequired(requests.HandleCreate(friendshipUseCase)))
 		})
 
 	})

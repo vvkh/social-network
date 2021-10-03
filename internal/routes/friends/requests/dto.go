@@ -1,4 +1,4 @@
-package friends_requests
+package requests
 
 import (
 	"github.com/vvkh/social-network/internal/domain/profiles/entity"

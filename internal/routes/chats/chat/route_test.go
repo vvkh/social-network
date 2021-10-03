@@ -106,7 +106,7 @@ func TestChatPage(t *testing.T) {
 				profilesMock.EXPECT().GetByID(gomock.Any(), test.wantGetProfilesRequest...).Return(test.getProfilesResponse, nil)
 			}
 			log, _ := zap.NewDevelopment()
-			s := server.New(log.Sugar(), ":80", "../../../templates", nil, profilesMock, friendshipMock, chatsMock)
+			s := server.New(log.Sugar(), ":80", "../../../../templates", nil, profilesMock, friendshipMock, chatsMock)
 
 			request := httptest.NewRequest("GET", "/chats/1/", nil)
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))

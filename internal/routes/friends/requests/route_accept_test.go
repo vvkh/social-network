@@ -1,4 +1,4 @@
-package friends_requests_test
+package requests_test
 
 import (
 	"net/http"
@@ -39,7 +39,7 @@ func TestAcceptFriendshipRequest(t *testing.T) {
 			friendshipUseCase := mocks.NewMockUseCase(ctrl)
 			friendshipUseCase.EXPECT().AcceptRequest(gomock.Any(), test.profileID, test.self.ID).Return(nil)
 			log, _ := zap.NewDevelopment()
-			s := server.New(log.Sugar(), ":80", "../../../templates", nil, nil, friendshipUseCase, nil)
+			s := server.New(log.Sugar(), ":80", "../../../../templates", nil, nil, friendshipUseCase, nil)
 			request := httptest.NewRequest("POST", test.url, nil)
 			request = request.WithContext(middlewares.AddProfileToCtx(request.Context(), test.self))
 			responseWriter := httptest.NewRecorder()
