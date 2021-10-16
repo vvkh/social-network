@@ -50,10 +50,10 @@ func (mr *MockUseCaseMockRecorder) GetUnreadMessagesCount(ctx, profileID interfa
 }
 
 // GetOrCreateChat mocks base method
-func (m *MockUseCase) GetOrCreateChat(ctx context.Context, oneProfileID uint64, otherProfileID int64) (int64, error) {
+func (m *MockUseCase) GetOrCreateChat(ctx context.Context, oneProfileID, otherProfileID uint64) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOrCreateChat", ctx, oneProfileID, otherProfileID)
-	ret0, _ := ret[0].(int64)
+	ret0, _ := ret[0].(uint64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
