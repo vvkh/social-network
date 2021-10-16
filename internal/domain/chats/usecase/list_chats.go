@@ -7,5 +7,5 @@ import (
 )
 
 func (u *uc) ListChats(ctx context.Context, profileID uint64) ([]entity.Chat, error) {
-	return nil, nil
+	return u.repo.ListChats(ctx, profileID)
 }
