@@ -87,7 +87,7 @@ func TestChatPage(t *testing.T) {
 			wantGetProfilesRequest: []interface{}{},
 			wantBodyParts: []string{
 				`<form method="POST" action="/chats/1/message/">`,
-				`<textarea name="message"></textarea>`,
+				`<textarea id="message" name="message"></textarea>`,
 				`<input type="submit" value="send message">`,
 				`</form>`,
 			},

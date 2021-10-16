@@ -96,15 +96,15 @@ func (mr *MockUseCaseMockRecorder) ListChatMessages(ctx, profileID, chatID inter
 }
 
 // SendMessage mocks base method
-func (m *MockUseCase) SendMessage(ctx context.Context, profileID, chatID uint64, authorProfileID int64, message string) error {
+func (m *MockUseCase) SendMessage(ctx context.Context, authorProfileID, chatID uint64, content string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendMessage", ctx, profileID, chatID, authorProfileID, message)
+	ret := m.ctrl.Call(m, "SendMessage", ctx, authorProfileID, chatID, content)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SendMessage indicates an expected call of SendMessage
-func (mr *MockUseCaseMockRecorder) SendMessage(ctx, profileID, chatID, authorProfileID, message interface{}) *gomock.Call {
+func (mr *MockUseCaseMockRecorder) SendMessage(ctx, authorProfileID, chatID, content interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessage", reflect.TypeOf((*MockUseCase)(nil).SendMessage), ctx, profileID, chatID, authorProfileID, message)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessage", reflect.TypeOf((*MockUseCase)(nil).SendMessage), ctx, authorProfileID, chatID, content)
 }

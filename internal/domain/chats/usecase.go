@@ -13,5 +13,5 @@ type UseCase interface {
 	GetOrCreateChat(ctx context.Context, oneProfileID uint64, otherProfileID int64) (int64, error)
 	ListChats(ctx context.Context, profileID uint64) ([]entity.Chat, error)
 	ListChatMessages(ctx context.Context, profileID uint64, chatID uint64) (entity.Chat, []entity.Message, error)
-	SendMessage(ctx context.Context, profileID uint64, chatID uint64, authorProfileID int64, message string) error
+	SendMessage(ctx context.Context, authorProfileID uint64, chatID uint64, content string) error
 }

@@ -8,7 +8,8 @@
     {{ end }}
 
     <form method="POST" action="/chats/{{ .Chat.ID }}/message/">
-        <textarea name="message"></textarea>
+        <label for="message">your message</label>
+        <textarea id="message" name="message"></textarea>
         <input type="submit" value="send message">
     </form>
 {{ end }}
